@@ -112,12 +112,12 @@ public partial class @PlayerInputMap: IInputActionCollection2, IDisposable
                 },
                 {
                     ""name"": ""Dash"",
-                    ""type"": ""Button"",
+                    ""type"": ""Value"",
                     ""id"": ""5064d6e1-94ab-4d00-a3af-9d130150c038"",
-                    ""expectedControlType"": """",
+                    ""expectedControlType"": ""Vector2"",
                     ""processors"": """",
                     ""interactions"": """",
-                    ""initialStateCheck"": false
+                    ""initialStateCheck"": true
                 },
                 {
                     ""name"": ""PickUp"",
@@ -173,7 +173,7 @@ public partial class @PlayerInputMap: IInputActionCollection2, IDisposable
                 {
                     ""name"": """",
                     ""id"": ""aeb83af5-9510-4699-aceb-f9c9017408fa"",
-                    ""path"": """",
+                    ""path"": ""<Gamepad>/rightShoulder"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
