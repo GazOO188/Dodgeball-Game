@@ -54,7 +54,6 @@ public class BulletCount : MonoBehaviour
     }
 
     //THIS FUNCTION IS FOR SPAWNING BULLETS//
-
     private void SpawnBulletstoTheLeft(GameObject Dodgeballs)
     {
         

@@ -2,10 +2,17 @@ using UnityEngine;
 
 public class DetectWalls : MonoBehaviour
 {
+
+    //GETS THE RIGIDBODY OF THE BULLET//
     public Rigidbody rb;    
+
+    //VAIRIABLE FOR SPEED OF THE BULLET//
     private float bulletSpeed = 10f; 
 
+    //THIS VARIIABLE SAVES THE SPEED AND DIRECTION OF THE BULLET//
     private Vector3 currentVelocity;
+   
+    //BOOL FOR TRACKING IF THE BULLET IS IN FILIGHT//
     private bool isFlying = false;
 
 
@@ -32,11 +39,20 @@ public class DetectWalls : MonoBehaviour
     {
         if (rb == null) rb = GetComponent<Rigidbody>();
 
+        //SETS THE SPEED OF THE BULLET OF YOUR CHOOSING//
         bulletSpeed = speed;
         
         isFlying = true;
         
         //MAKES THE BULLET TRAVEL/MOVE IN A CONSISTENT WAY//
+
+        //THIS TAKES: 
+
+        //1) shootDirection.normalized -> THE DIRECTION THE GUN IS POINTING AND NORMALIZES IT (LENGTH OF 1)
+
+        //2) MULTIPLIES THE DIRECTION BY BULLETSPEED TO MAKE IT SHOOT//
+        
+        //3) THIS LINE IS FOR THE INITIAL MOMENTUM OF THE BULLET -> MAKES BULLET FLY ON THE FIRST FRAME//
         rb.linearVelocity = shootDirection.normalized * bulletSpeed;
         
         //THIS MAKES THE BULLET'S TRANSFORM VISUALLY FACE IN THE NEW DIRECTION IT'S GOING//
@@ -49,16 +65,17 @@ public class DetectWalls : MonoBehaviour
         //IF THE BULLET ISN'T FLYING OR IN MOTION, SKIP HERE AND STOP (RETRURN)
         if (!isFlying) return;
 
-        // Maintain exact target speed overriding any physics drag
+        //THIS KEEPS THE BULLET MOVING IN FLIGHT IN THE DIRECTION ITS MOVING//
         rb.linearVelocity = rb.linearVelocity.normalized * bulletSpeed;
         
-        // Match visual rotation smoothly to the current flight trajectory
+        // IS THE BULLET MOVING ENOUGH (CAN BE NOT MOVING AND WITH ZERO VELOCITY)//
         if (rb.linearVelocity.sqrMagnitude > 0.1f)
         {
+           // Match visual rotation smoothly to the current flight trajectory
             transform.forward = rb.linearVelocity.normalized;
         }
         
-        //SAVES THE VVELOITY
+        //SAVES THE VVELOITY BEOFRE THE FRAME IT COLLIDES WITH THE WALL//
         currentVelocity = rb.linearVelocity;
     }
 
@@ -87,19 +104,22 @@ public class DetectWalls : MonoBehaviour
             // CHECK IF BULLET COLLIDED WITH PLAYER //
         if (collision.gameObject.CompareTag("Player") && isFlying)
         {
-                 // IF THIS IS THE PERSON WITH THE BULLET, DON'T MAKE IT COUNT TOWARDS DAMAGE
+              //IF THIS IS THE PERSON WITH THE BULLET, DON'T MAKE IT COUNT TOWARDS DAMAGE
               if(collision.gameObject == Owner)
              {
+                //EXITS/ DOSEN'T SPPLY DAMAGE TO THE OWNER OF THE BULLET//
                 return;
              }
        
-                 // 🎯 FIXES: Turn off flying, clear rigidbodies, and use Vector3.zero
+                
                  isFlying = false;
                  rb.linearVelocity = Vector3.zero; 
                  currentVelocity = Vector3.zero; 
        
                  HealthBar HB = collision.gameObject.GetComponentInChildren<HealthBar>();
 
+
+               //DECREASES THE HEALTH OF THE PLAYER HIT BY THE BULLET//
                if (HB != null)
                {       
                     
@@ -107,7 +127,6 @@ public class DetectWalls : MonoBehaviour
                    
                }
 
-            // 🎯 PROFESSIONAL TOUCH: Destroy the bullet asset on impact so it cleans up nicely
            //  Destroy(gameObject);
     
         }   
@@ -116,7 +135,6 @@ public class DetectWalls : MonoBehaviour
 
 
     //FUNCTION TO SET OWNER//
-
     public void SetOwner(GameObject shooter)
     {
 

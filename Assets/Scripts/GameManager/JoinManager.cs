@@ -50,28 +50,32 @@ public class JoinManager : MonoBehaviour
     }
 
 
-  
+    //THIS FUNCTION IS CALLED WHEN A PLAYER JOINS THE GAME ON BUTTON INPUT/PRESS
     public void OnPlayerJoined(PlayerInput playerInput)
     {
          
-          // 📢 ADD THIS LOG AT THE VERY TOP:
-           Debug.Log("📢 UNITY SUCCESSFULLY TRIGGERED ONPLAYERJOINED!");
+           // DEBUG//
+           Debug.Log("PLAYERJOINED!");
 
            
-        
+          //SAFETY CHECK: IF PLAYER DATA/PLAYER DOSENT EXIST OR MISSING STOPS THE CODE HERE//
           if (playerInput == null) return;
 
+
+              //THIS LOOKS INSIDE THE NEWLY SPAWNED PLAYER AND SEARCHES FOR THE PLAYERMOVEMENT SCRIPT//
               PlayerMovement playerScript = playerInput.GetComponent<PlayerMovement>();
 
+         //IF THE PLAYERSCRIPT IS SUCCESFFULLY FOUND -> != NULL
           if (playerScript != null)
           {
                 
+                //THIS CHECKS IF THE GAMEMANAGER (SCRIPT/OBJ) EXISTS IN THE SCENE//
                 if (GameManager.Instance != null)
                 {
-                     // Fetch the canvas asset from your GameManager singleton
+                    //SAVES THE CANVAS INTO THIS VARIABLE//
                     GameObject globalCanvas = GameManager.Instance.RequestCanvas();
             
-                    // Hand it over safely to the player script
+                    // ASSIGNS THE CANVAS OFFCIAILLY//
                     playerScript.AssignButtonCanvas(globalCanvas);
                 }
     
@@ -124,7 +128,7 @@ public class JoinManager : MonoBehaviour
                //IF IN BETWEEN THE RANGES 0-2, GIVE THE PLAYER A RED COLOR//
                case Teams.Red:
                {
-                    
+                    //MAKES THE PLAYER APPEAR RED//
                     Renderer r = playerInput.GetComponent<Renderer>();
 
                     r.material.color = Color.red;
@@ -136,6 +140,7 @@ public class JoinManager : MonoBehaviour
                case Teams.Blue:
                {
                     
+                    //MAKES THE PLAYER APPEAR BLUE//
                     Renderer r = playerInput.GetComponent<Renderer>();
 
                     r.material.color = Color.blue;

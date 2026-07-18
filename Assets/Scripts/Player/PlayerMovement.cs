@@ -23,9 +23,12 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private bool CanShowPickUpPrompt = false;
     [SerializeField] private bool CanPickup = false;
     [SerializeField] private bool isDashing = false;
+    [SerializeField] private bool CanJump = false;
+
 
     [Header("Transforms")]
     [SerializeField] private Transform BulletPos;
+   // [SerializeField] private Transform BulletPos;
 
 
     //VECTORS TO USE WITH NEW INPUT//
@@ -48,6 +51,8 @@ public class PlayerMovement : MonoBehaviour
         
         // Find the canvas even if it starts hidden/deactivated inside the prefab
         FindButtonCanvas();
+
+        FindGroundPosition();
     }
 
     void Start()
@@ -70,6 +75,7 @@ public class PlayerMovement : MonoBehaviour
         PI.actions["PickUp"].performed += OnPickupTriggered;
         PI.actions["Shoot"].performed += OnShootTriggered;
         PI.actions["Dash"].performed += OnDashTriggered;
+        PI.actions["Jump"].performed += OnJumpTriggered;
     }
 
     void OnDisable()
@@ -84,10 +90,12 @@ public class PlayerMovement : MonoBehaviour
         PI.actions["PickUp"].performed -= OnPickupTriggered;
         PI.actions["Shoot"].performed -= OnShootTriggered;
         PI.actions["Dash"].performed -= OnDashTriggered;
+        PI.actions["Jump"].performed -= OnJumpTriggered;
 
     }
 
 
+    //THIS FUNCTION IS FOR FINDING THE BUTTON CANVAS//
     private void FindButtonCanvas()
     {
         Transform[] allChildren = GetComponentsInChildren<Transform>(true);
@@ -108,9 +116,19 @@ public class PlayerMovement : MonoBehaviour
                 return; 
             }
         }
-        
-        
+         
         Debug.LogError("Couldn't find a GameObject named exactly 'Button Canvas'!");
+    }
+
+
+    //THIS FUNCTION IS FOR FINDING THE GROUNDPOSITION GAMEOBJECT//
+    private void FindGroundPosition()
+    {
+        
+        Transform[]AllChildren = GetComponentsInChildren<Transform>(true);
+
+
+
     }
 
 
@@ -118,14 +136,23 @@ public class PlayerMovement : MonoBehaviour
     void Update()
     {
         //STORES VECTOR2 VALUES FOR MOVE AND LOOK VECTOR2//
+
+        //READS THE LEFT JOYSTICK AND SAVES INPUTS INTO MOVEVECTOR//
         MoveVector = PI.actions["Move"].ReadValue<Vector2>();
+
+        //READS THE RIGHT JOYSTICK FOR LOOKING AROUND//
         LookVector = PI.actions["Look"].ReadValue<Vector2>();
 
-       
+        //CALCULATES HOW MUCH THE PLAYER SHOULD TURN THIS 
         float yRotation = LookVector.x * RotationSpeed * Time.deltaTime;
+
+        //THIS ACTUALLY TURNS THE PLAYER SPINS THE CHARACTER LEFT AND RIGHT AROUNF THE Y-AXIS//
         transform.Rotate(Vector3.up * yRotation);
 
+        //CAM FORWARD IS ASKING WHICH WAY YOU ARE LOOKING RIGHT NOW/FACING//
         Vector3 camForward = Camera.main.transform.forward;
+
+        //CAM RIGHT IS ASKING WHICH WAY IS THE RIGHT SIDE LOOKING AT//
         Vector3 camRight = Camera.main.transform.right;
 
         camForward.y = 0;
@@ -135,8 +162,10 @@ public class PlayerMovement : MonoBehaviour
         camRight.Normalize();
 
         //THIS LINE CREATES A NEW DIRECTION VECTOR (CAMERA RELATIVE MOVEMENT):
-        
+
         // 1) WHEN PLAYER PUSHES FORWARD ON JOYSTICK -> MOVE FORWARD RELATIVE TO CAMERA OR IS LOOKING//
+
+        // 2) IF YOU PUSH RIGHT ON THE JOYSTICK, MOVES RIGHT RELATIVE TO THE CAMERA//
         Direction = (camRight * MoveVector.x + camForward * MoveVector.y).normalized;
 
         ShowPickupButton(ButtonCanvas);
@@ -164,6 +193,15 @@ public class PlayerMovement : MonoBehaviour
         {
             ShootBehavior.Shoot();
         }
+    }
+
+
+    // NEW INPUT FUNCTION: FOR JUMPING ON BUTTON PRESS//
+    private void OnJumpTriggered(InputAction.CallbackContext context)
+    {
+        
+       // CanJump = Physics.CheckSphere(groundCheckPos.position, 0.2f, LayerMask.GetMask("Ground"));
+
     }
 
     //DASHING LOGIC W/ INPUT SYSTEM//
@@ -201,6 +239,7 @@ public class PlayerMovement : MonoBehaviour
         if (CanPickup && Reference != null)
         {
 
+            //CUSTOM SETTINGS FOR THE ROTATION AND SCALE//
             Reference.transform.position = BulletPos.position;
             Reference.transform.SetParent(BulletPos);
             Reference.transform.localRotation = Quaternion.Euler(84.815f, 0f, 0f);
@@ -308,7 +347,7 @@ public class PlayerMovement : MonoBehaviour
     {
         if (ButtonCanvas != null) 
         {
-            Debug.LogWarning("JoinManager tried to assign an external canvas, but we are safely using our own child canvas instead!");
+            Debug.LogWarning("JoinManager tried to assign an external canvas");
             return; 
         }
 
