@@ -7,18 +7,17 @@ public class DetectWalls : MonoBehaviour
     public Rigidbody rb;    
 
     //VAIRIABLE FOR SPEED OF THE BULLET//
-    private float bulletSpeed = 10f; 
+    [SerializeField] private float bulletSpeed = 2f; 
 
     //THIS VARIIABLE SAVES THE SPEED AND DIRECTION OF THE BULLET//
     private Vector3 currentVelocity;
    
     //BOOL FOR TRACKING IF THE BULLET IS IN FILIGHT//
-    private bool isFlying = false;
+    public bool isFlying = false;
 
 
     //THIS VARIABLE IS TO REMEMBER WHO SHOT THE BULLET FIRST TO PREVENT DAMAGE//
-    [SerializeField] private GameObject Owner;
-
+    [SerializeField] public GameObject Owner;
 
   
     void Start()
@@ -43,6 +42,9 @@ public class DetectWalls : MonoBehaviour
         bulletSpeed = speed;
         
         isFlying = true;
+
+
+        Owner.GetComponent<PlayerMovement>().HoldingBullet = false;
         
         //MAKES THE BULLET TRAVEL/MOVE IN A CONSISTENT WAY//
 
@@ -57,6 +59,29 @@ public class DetectWalls : MonoBehaviour
         
         //THIS MAKES THE BULLET'S TRANSFORM VISUALLY FACE IN THE NEW DIRECTION IT'S GOING//
         transform.forward = rb.linearVelocity.normalized;
+    }
+
+
+
+    //THIS FUNCTION IS FOR TURNING OFF/DISABLING FLIGHT//
+
+    public void StopBulletMotion()
+    {
+        isFlying = false;
+        
+        if (rb == null) rb = GetComponent<Rigidbody>();
+        
+        if (rb != null)
+        {
+            rb.linearVelocity = Vector3.zero;
+            
+            rb.angularVelocity = Vector3.zero;
+            
+            rb.isKinematic = true; 
+        }
+
+        Debug.Log("STOP!");
+
     }
 
     void FixedUpdate()
@@ -75,7 +100,7 @@ public class DetectWalls : MonoBehaviour
             transform.forward = rb.linearVelocity.normalized;
         }
         
-        //SAVES THE VVELOITY BEOFRE THE FRAME IT COLLIDES WITH THE WALL//
+        //SAVES THE VELOITY BEOFRE THE FRAME IT COLLIDES WITH THE WALL//
         currentVelocity = rb.linearVelocity;
     }
 
@@ -99,37 +124,95 @@ public class DetectWalls : MonoBehaviour
 
             //BOUNCE OFF AT A CERTAIN SPEED IN THAT DIRECTION//
             rb.linearVelocity = reflectedDirection.normalized * bulletSpeed;
+
+            Owner = null;
         }
 
-            // CHECK IF BULLET COLLIDED WITH PLAYER //
+        // CHECK IF BULLET COLLIDED WITH PLAYER //
         if (collision.gameObject.CompareTag("Player") && isFlying)
         {
-              //IF THIS IS THE PERSON WITH THE BULLET, DON'T MAKE IT COUNT TOWARDS DAMAGE
-              if(collision.gameObject == Owner)
-             {
-                //EXITS/ DOSEN'T SPPLY DAMAGE TO THE OWNER OF THE BULLET//
-                return;
-             }
-       
+
+                PlayerMovement Obj = collision.gameObject.GetComponent<PlayerMovement>();
                 
-                 isFlying = false;
-                 rb.linearVelocity = Vector3.zero; 
-                 currentVelocity = Vector3.zero; 
-       
-                 HealthBar HB = collision.gameObject.GetComponentInChildren<HealthBar>();
+                 // IF THIS IS THE PERSON WITH THE BULLET, DON'T MAKE IT COUNT TOWARDS DAMAGE
+                 if(Obj == null) return;
 
-
-               //DECREASES THE HEALTH OF THE PLAYER HIT BY THE BULLET//
-               if (HB != null)
-               {       
+                 
+              
+                 // GET THE SCRIPT OF THE PLAYER WHO SHOT THE BULLET
+                 if (Owner != null)
+                 {
                     
-                 HB.DecreaseHealthVisually(50f);
-                   
-               }
+                    PlayerMovement Shooter = collision.gameObject.GetComponent<PlayerMovement>();
 
-           //  Destroy(gameObject);
+                            //IF THE SHOOTER TEAM AND TEAMAMATE ARE ON THE SAME TEAM DON'T MAKE TEAMMATE TAKE DAMAGE (FRIENDLY FIRE OFF)//
+                            if(Shoot != null && Shooter.MyTeam == Obj.MyTeam)
+                             {
+                    
+                                return;
+
+
+                             }
+
+
+                 }
+
+
+           
+                 
+                 //MAKES SURE DAMAGE ISN'T APPLIED ON DAMAGE//
+                 if (Obj.CanCatch && Obj.BulletReference == gameObject && Obj.CatchingPressed)
+                 {
+                     return; 
+                 }
+
+                
+                //IF THE 
+                if (collision.gameObject == Owner)
+                {
+                 return; 
+                }
+
+                // STOP ALL FLIGHT LOGIC AND FORWARD MOMENTUM IMMEDIATELY
+                isFlying = false; 
+                rb.linearVelocity = Vector3.zero;
+                rb.angularVelocity = Vector3.zero; 
+
+                // ALLOW GRAVITY TO TAKE OVER SO IT DROPS TO THE GROUND
+                rb.isKinematic = false; 
+                rb.useGravity = true;
+
     
-        }   
+                //WHEN ISTRIGGER IS TURN OFF -> COLLIDER BECOMES SOLID WALL//
+
+                //WHEN ISTRIGGER IS TURN ON -> SWITCHES FROM ONCOLLISIONENTER TO ONTRIGGERENETER
+
+                // ONTRIGGERENTER WDETECTS OBJECTS THAT ARE SET AS TRIGGERS//
+                if (TryGetComponent<Collider>(out Collider myCollider))
+                {
+
+                //THIS WORKS WITH THE PICKUP MECHANIC:
+               
+                // 1) WHEN THE BULLET COLLIDES WITH THE PLAYER, THE PICKUP PROMPT TRIGGERS//
+                // 2) PLAYER/ENEMY PICKS IT UP AND SHOOTS AGAIN//
+                 myCollider.isTrigger = true; 
+               
+                }
+
+                HealthBar HB = collision.gameObject.GetComponentInChildren<HealthBar>();
+
+
+                // DECREASES THE HEALTH OF THE PLAYER HIT BY THE BULLET // 
+                if (HB != null)
+                {       
+                
+                HB.DecreaseHealthVisually(50f);
+    
+                }
+
+   
+            // Destroy(gameObject, 3f);
+        }
 
     }
 

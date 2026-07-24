@@ -360,4 +360,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DetectWalls
   rb: {fileID: 4988093467772292296}
-  bulletSpeed: 30
+  bulletSpeed: 5.46
+  Owner: {fileID: 0}

@@ -19,10 +19,14 @@ public class JoinManager : MonoBehaviour
 
     [Header("Script Reference")]
     [SerializeField] public HealthBar HealthScript;
+
+
+    [Header("Boolean")]
+    [SerializeField] public bool IsinRedTeam, IsinBlueTeam;
    
 
     //ENUM FOR TEAMS//
-    private enum Teams
+    public enum Teams
     {
 
      None,
@@ -34,8 +38,22 @@ public class JoinManager : MonoBehaviour
 
     }
 
-     private Teams CurrentTeams = Teams.None;
+     public Teams CurrentTeams = Teams.None;
 
+    
+    void Awake()
+    {
+
+        ///DECLARING || SAVING INSTANCE OF THIS JOINMANAGER//
+        if (JoinInstance == null)
+        {
+            JoinInstance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
     
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -90,6 +108,8 @@ public class JoinManager : MonoBehaviour
 
 
           //SPAWN THE PLAYER AT THEIR SPAWN POINTS//  
+
+          //IF THE PLAYERINDEX IS LESS THAN THE PLAYER SPAWN AMOUNTS THEN DO THIS, ELSE DON'T DO THIS CODE IF THERE A LOT OF PLAYERS/
           if (PlayerIndex < PlayerSpawnPoints.Count && PlayerSpawnPoints[Index] != null)
           {
                 //THIS ASSIGNS THE PLAYER'S TO THEIR POSITION ON THE MAP WITH CORRECT POSITION AND ROTATION//
@@ -132,6 +152,8 @@ public class JoinManager : MonoBehaviour
                     Renderer r = playerInput.GetComponent<Renderer>();
 
                     r.material.color = Color.red;
+
+
                     break;
 
                }

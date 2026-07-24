@@ -4,7 +4,6 @@ using UnityEngine.InputSystem;
 public class PlayerMovement : MonoBehaviour
 {
     // THIS SCRIPT IS FOR PLAYER MOVEMENT //
-
     [SerializeField] private PlayerInput PI;
     [SerializeField] public Shooting ShootBehavior;
 
@@ -12,6 +11,8 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float speed;
     [SerializeField] private float RotationSpeed;
     [SerializeField] private float DashForce;
+    [SerializeField] private float JumpForce;
+    [SerializeField] private float gravityForce;
 
     [Header("Rigidbody")]
     [SerializeField] private Rigidbody rb;
@@ -22,15 +23,36 @@ public class PlayerMovement : MonoBehaviour
     [Header("Bools")]
     [SerializeField] private bool CanShowPickUpPrompt = false;
     [SerializeField] private bool CanPickup = false;
+    [SerializeField] public bool HoldingBullet = false;
     [SerializeField] private bool isDashing = false;
     [SerializeField] private bool CanJump = false;
+    [SerializeField] public bool CanCatch = false;
+    [SerializeField] public bool CatchingPressed = false;
 
 
     [Header("Transforms")]
     [SerializeField] private Transform BulletPos;
-   // [SerializeField] private Transform BulletPos;
+    [SerializeField] private Transform GroundPos;
+
+   
+    [Header("Layers")]
+    [SerializeField] private LayerMask GroundLayer;
 
 
+    [Header("SphereCast Settings")]
+    [SerializeField] private float catchRadius = 2.0f;
+    [SerializeField] private float SphereOffset;
+    [SerializeField] private Vector3 VectorOffset;  //OFFSET FOR SPHERECAST//
+
+
+
+    [Header("Variables for Timing Catch")]
+    [SerializeField] private float CatchTimer = 0.5f;
+
+
+    public JoinManager.Teams MyTeam = JoinManager.Teams.None;
+    
+    
     //VECTORS TO USE WITH NEW INPUT//
     private Vector2 MoveVector;
    
@@ -40,8 +62,14 @@ public class PlayerMovement : MonoBehaviour
    
     private Vector3 Direction;
 
-    // This will securely hold the child canvas that spawned with this player
+    // HOLDS A REFERENCE TO THE BUTTONCANVAS//
     private GameObject ButtonCanvas;
+
+
+    private GameObject GroundPositionCheck;
+
+
+
 
     void Awake()
     {
@@ -50,18 +78,15 @@ public class PlayerMovement : MonoBehaviour
         PI = GetComponent<PlayerInput>();
         
         // Find the canvas even if it starts hidden/deactivated inside the prefab
-        FindButtonCanvas();
+        FindButtonCanvas("Button Canvas");
 
         FindGroundPosition();
     }
 
     void Start()
     {
-        // Double-check check in Start() in case Awake() fired too early during instantiation
-        if (ButtonCanvas == null)
-        {
-            FindButtonCanvas();
-        }
+        
+        
     }
 
     void OnEnable()
@@ -76,6 +101,7 @@ public class PlayerMovement : MonoBehaviour
         PI.actions["Shoot"].performed += OnShootTriggered;
         PI.actions["Dash"].performed += OnDashTriggered;
         PI.actions["Jump"].performed += OnJumpTriggered;
+        PI.actions["Catch"].performed += OnCatchTriggered;
     }
 
     void OnDisable()
@@ -91,42 +117,61 @@ public class PlayerMovement : MonoBehaviour
         PI.actions["Shoot"].performed -= OnShootTriggered;
         PI.actions["Dash"].performed -= OnDashTriggered;
         PI.actions["Jump"].performed -= OnJumpTriggered;
+        PI.actions["Catch"].performed -= OnCatchTriggered;
 
     }
 
 
     //THIS FUNCTION IS FOR FINDING THE BUTTON CANVAS//
-    private void FindButtonCanvas()
+    private void FindButtonCanvas(string ChildName)
     {
-        Transform[] allChildren = GetComponentsInChildren<Transform>(true);
 
-        foreach (Transform child in allChildren)
+        //THIS MAKES AN ARRAY THAT HOLDS MULTIPLE TRANSFORM COMPONENTS/
+
+        //A FOREACH LOOP WHICH LOOKS AT ALL THE TRANSFORM CHILDREN ON THE OBJECT//
+        foreach (Transform child in GetComponentsInChildren<Transform>(true))
+
         {
             // CHECKS IF THE CHILD'S NAME MATCHES BUTTON CANVAS//
-            if (child.name == "Button Canvas")
+            if (child.name == ChildName)
             {
                 ButtonCanvas = child.gameObject;
 
                 //MAKES THE BUTTON CANAVS HIDDEN//
                 ButtonCanvas.SetActive(false); 
 
-                Debug.Log("Located the exact 'Button Canvas' GameObject");
+                Debug.Log("Located the Button Canvas GameObject");
 
                 //STOPS SEARCHING AND EXITS THE FUNCTION//
                 return; 
             }
         }
          
-        Debug.LogError("Couldn't find a GameObject named exactly 'Button Canvas'!");
+        Debug.LogError("Couldn't find Button Canvas");
     }
 
 
     //THIS FUNCTION IS FOR FINDING THE GROUNDPOSITION GAMEOBJECT//
     private void FindGroundPosition()
     {
-        
-        Transform[]AllChildren = GetComponentsInChildren<Transform>(true);
+      
 
+        foreach(Transform children in GetComponentsInChildren<Transform>(true))
+        {
+            
+            if(children.name == "GroundPosition")
+            {
+                
+                 GroundPos = children.gameObject.transform;
+                 
+                 
+                 return;
+
+
+            }
+
+
+        }
 
 
     }
@@ -135,6 +180,8 @@ public class PlayerMovement : MonoBehaviour
 
     void Update()
     {
+
+
         //STORES VECTOR2 VALUES FOR MOVE AND LOOK VECTOR2//
 
         //READS THE LEFT JOYSTICK AND SAVES INPUTS INTO MOVEVECTOR//
@@ -142,6 +189,14 @@ public class PlayerMovement : MonoBehaviour
 
         //READS THE RIGHT JOYSTICK FOR LOOKING AROUND//
         LookVector = PI.actions["Look"].ReadValue<Vector2>();
+
+
+       
+  
+        //BOOLEAN FOR JUMPING//
+        CanJump = Physics.CheckSphere(GroundPos.position, 1f, GroundLayer);
+
+
 
         //CALCULATES HOW MUCH THE PLAYER SHOULD TURN THIS 
         float yRotation = LookVector.x * RotationSpeed * Time.deltaTime;
@@ -169,6 +224,26 @@ public class PlayerMovement : MonoBehaviour
         Direction = (camRight * MoveVector.x + camForward * MoveVector.y).normalized;
 
         ShowPickupButton(ButtonCanvas);
+
+        CastSphere();
+
+        TimerCatch();
+
+    }
+
+
+
+       // DRAWS THE CATCHING ZONE VISUALLY INSIDE THE UNITY SCENE VIEW //
+    private void OnDrawGizmos()
+    {
+        // 1. Choose a clear color (Green)
+        Gizmos.color = Color.green;
+
+        // 2. Define the exact center position matching your CastSphere function (5f offset)
+        Vector3 sphereCenter = transform.position + (transform.forward * SphereOffset) + VectorOffset;
+
+        // 3. Draw the single catching circle sphere
+        Gizmos.DrawWireSphere(sphereCenter, catchRadius);
     }
 
     void FixedUpdate()
@@ -177,6 +252,19 @@ public class PlayerMovement : MonoBehaviour
         if (isDashing) return;
 
         rb.linearVelocity = new Vector3(Direction.x * speed, rb.linearVelocity.y, Direction.z * speed);
+
+
+
+        //THIS IS TO APPLY GRAVITY WHEN THE PLAYER IS FALLING TO THE GROUND//
+        if(rb.linearVelocity.y < 0)
+        {
+        
+        //APPLYS GRAVITY//
+        rb.linearVelocity += Vector3.up * Physics.gravity.y * (gravityForce - 1) * Time.fixedDeltaTime;
+
+        }
+
+
     }
 
 
@@ -199,8 +287,14 @@ public class PlayerMovement : MonoBehaviour
     // NEW INPUT FUNCTION: FOR JUMPING ON BUTTON PRESS//
     private void OnJumpTriggered(InputAction.CallbackContext context)
     {
-        
-       // CanJump = Physics.CheckSphere(groundCheckPos.position, 0.2f, LayerMask.GetMask("Ground"));
+
+        if (CanJump)
+        {
+            
+            //THIS MAKES THE PLAYER JUMP//
+            rb.linearVelocity = new Vector3(rb.linearVelocity.x, JumpForce, rb.linearVelocity.z);
+
+        }
 
     }
 
@@ -213,6 +307,151 @@ public class PlayerMovement : MonoBehaviour
             ActivateDash();
         }
     }
+
+
+  
+  
+    // CATCHING LOGIC W/ NEW INPUT SYSTEM //
+    private void OnCatchTriggered(InputAction.CallbackContext context)
+    {
+
+        if(!CanCatch) return;
+        
+        if (CanCatch && BulletReference != null && !HoldingBullet)
+        {
+
+             CatchingPressed = true;
+            
+            // GETS THE DETECT WALLS SCRIPT AND STOPS THE BULLET FROM TRAVELING//
+            if (BulletReference.TryGetComponent<DetectWalls>(out DetectWalls bulletScript))
+            {
+
+                //CALLS THE STOP BULLET FUNCTION
+                bulletScript.StopBulletMotion();
+            }
+
+            //THIS IS TO CATCH THE BULLET AND PUT IT IN THE PLAYERS HANDS//
+            BulletReference.transform.position = BulletPos.position;
+            BulletReference.transform.SetParent(BulletPos);
+            BulletReference.transform.localRotation = Quaternion.Euler(84.815f, 0f, 0f);
+            BulletReference.transform.localScale = new Vector3(0.1563195f, 0.152701f, 0.06677458f);
+
+            // DISABLING THE COLLIDER SO IT DOSENT CAUSE PROBLEMS
+            if (BulletReference.TryGetComponent<Collider>(out Collider col))
+            {
+                col.enabled = false;
+            }
+
+            //GETS RIGIDBODY AND PREVENTS SPIINING AND MOVMEMENT TO MAKE SURE//
+            if (BulletReference.TryGetComponent<Rigidbody>(out Rigidbody bulletRb))
+            {
+                bulletRb.linearVelocity = Vector3.zero;
+                bulletRb.angularVelocity = Vector3.zero;
+                bulletRb.isKinematic = true;
+            }
+
+            //RESETTING VARIABLES + MARK THE BULLET AS BEING HELD CURRENTLYS//
+            CanCatch = false;
+            CanPickup = false;
+            CanShowPickUpPrompt = false;
+            HoldingBullet = true;
+            CatchTimer = 0f;
+
+            CatchingPressed = false;
+        }
+    }
+
+
+    // THIS FUNCTION IS FOR SCANNING SPACE CONTINUOUSLY TO LOCATE THE BULLET //
+    private void CastSphere()
+    {
+       
+        if (BulletReference != null) return;
+
+        Vector3 sphereCenter = transform.position + (transform.forward * SphereOffset);
+       
+        // QueryTriggerInteraction.Collide forces the scan to see the bullet even if it turned into a ghost trigger
+        Collider[] hits = Physics.OverlapSphere(sphereCenter, catchRadius, Physics.AllLayers, QueryTriggerInteraction.Collide);
+
+        bool foundBullet = false;
+
+        foreach(Collider hit in hits)
+        {
+            if(hit.gameObject == gameObject)
+            {
+               continue;
+            }
+
+            if(hit.TryGetComponent<DetectWalls>(out DetectWalls bullet))
+            {
+                
+                
+           
+                if(!bullet.isFlying)
+                {
+                   
+                    continue;  
+
+                }
+
+                
+                 if(bullet.Owner == gameObject) continue;
+
+
+
+                Debug.Log("Bullet target indexed into inventory tracking buffer: " + hit.gameObject.name);
+
+
+                // Save references cleanly ahead of time for OnCatchTriggered to consume instantly
+                BulletReference = bullet.gameObject;
+
+                CanCatch = true;
+
+                foundBullet = true;
+
+
+                // SET THE TIMER: Reset your real script variable to its max window time (e.g., 0.5f)
+                CatchTimer = 0.5f; 
+                break; 
+            }
+        }
+
+    }
+
+
+    //FUNNCTION TO TIME THE CATCH//
+    private void TimerCatch()
+    {
+        
+
+        if(CanCatch && CatchTimer > 0f)
+        {
+            
+            CatchTimer -= Time.deltaTime;
+
+
+
+            if(CatchTimer <= 0f)
+            {
+                
+             
+             Debug.Log("Window over");
+
+             CanCatch = false; 
+             BulletReference = null;
+             CatchTimer = 0f;
+
+            }
+
+
+        }
+
+
+    }
+  
+
+
+
 
     private void ShowPickupButton(GameObject Canvas)
     {
@@ -255,14 +494,15 @@ public class PlayerMovement : MonoBehaviour
                 bulletRb.isKinematic = true;
             }
 
-            CanPickup = false;
+        
+            HoldingBullet = true;
+            CanCatch = false;
             CanShowPickUpPrompt = false;
         }
     }
 
 
     //THIS FUNCTION IS FOR DASHING//
-
     private void ActivateDash()
     {
 
@@ -295,8 +535,9 @@ public class PlayerMovement : MonoBehaviour
         isDashing = false;
     }
 
-    
-    
+
+  
+
     //THIS IS FOR WHENN THE PLAYER IS IN THE TRIGGER ZONE OF THE BULLET AT THE START OF THE GAME//
     private void OnTriggerEnter(Collider Other)
     {
@@ -319,7 +560,7 @@ public class PlayerMovement : MonoBehaviour
             else
             {
                
-                FindButtonCanvas();
+                FindButtonCanvas("Button Canvas");
                 if (ButtonCanvas != null) ButtonCanvas.SetActive(true);
             }
         }
@@ -339,6 +580,8 @@ public class PlayerMovement : MonoBehaviour
             {
                 ButtonCanvas.SetActive(false);
             }
+
+         
         }
     }
 

@@ -644,6 +644,37 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FaceTowardCamera
   playerPos: {fileID: 1701038683312443999}
   Offset: {x: -1.55, y: 2.08, z: 0}
+--- !u!1 &4744993235293891183
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3469330837076386357}
+  m_Layer: 0
+  m_Name: GroundPosition
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3469330837076386357
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4744993235293891183}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: -0.69, z: 0}
+  m_LocalScale: {x: 0.44315, y: 0.44315, z: 0.44315}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1701038683312443999}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &4754939211305307335
 GameObject:
   m_ObjectHideFlags: 0
@@ -1026,6 +1057,7 @@ Transform:
   - {fileID: 8295823408664415961}
   - {fileID: 8865831684640579692}
   - {fileID: 5392132005433207260}
+  - {fileID: 3469330837076386357}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &1155715781900159435
@@ -1125,12 +1157,26 @@ MonoBehaviour:
   speed: 8.24
   RotationSpeed: 992.6
   DashForce: 36.75
+  JumpForce: 5.05
+  gravityForce: 2.53
   rb: {fileID: 962883642193802899}
   BulletReference: {fileID: 0}
   CanShowPickUpPrompt: 0
   CanPickup: 0
+  HoldingBullet: 0
   isDashing: 0
+  CanJump: 0
+  CanCatch: 0
+  CatchingPressed: 0
   BulletPos: {fileID: 8320718907399842237}
+  GroundPos: {fileID: 3469330837076386357}
+  GroundLayer:
+    serializedVersion: 2
+    m_Bits: 64
+  catchRadius: 0.66
+  SphereOffset: 2.52
+  CatchTimer: 0.5
+  VectorOffset: {x: 0.7, y: 0.36, z: -1.51}
 --- !u!114 &2030841692140558080
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1145,7 +1191,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Shooting
   PM: {fileID: 0}
   BulletPos: {fileID: 8320718907399842237}
-  Bulletspeed: 32.7
+  Bulletspeed: 26.47
 --- !u!54 &962883642193802899
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -1262,6 +1308,14 @@ MonoBehaviour:
       m_Calls: []
     m_ActionId: 41bb878e-71e7-4b5c-901c-ef434934a07c
     m_ActionName: 'Player/Join[/XboxGamepadMacOSWireless/start]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 05185bfc-a2a0-49f5-9dab-a83387c5c8a4
+    m_ActionName: 'Player/Jump[/XboxGamepadMacOSWireless/buttonSouth]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: fc17524e-8639-4842-bc1a-fd0db29190ea
+    m_ActionName: 'Player/Catch[/XboxGamepadMacOSWireless/leftTrigger,/DualShock4GamepadHID/leftTrigger]'
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: Player

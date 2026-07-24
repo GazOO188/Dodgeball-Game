@@ -8,7 +8,7 @@ public class FaceTowardCamera : MonoBehaviour
     [Header("Height Adjustment")]
     [SerializeField] private Vector3 Offset; 
 
-    // Cache the camera reference to save performance processing power
+
     private Camera mainCamera;
 
     void Start()
@@ -20,10 +20,10 @@ public class FaceTowardCamera : MonoBehaviour
     {
         if (playerPos == null) return;
 
-        // 1. POSITION: Keeps the health bar attached above the player's head
+        // OFFSET//
         transform.position = playerPos.position + Offset;
 
-        // 2. ROTATION: Forces the canvas to mirror the camera view so it never flips or spins
+        // ROTATION
         if (mainCamera != null)
         {
             transform.rotation = mainCamera.transform.rotation;
