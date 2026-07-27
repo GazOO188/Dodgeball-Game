@@ -49,6 +49,10 @@ public class Shooting : MonoBehaviour
             {
                 //SETS THE OWNER TO BE THE PLAYER HOLDING THE BULLET//
                 bouncingBullet.SetOwner(gameObject);
+
+                //SAVE THE BULLET REFERENCE//
+                bouncingBullet.OwnerRef = PM.gameObject;
+                
                 bouncingBullet.Launch(BulletPos.forward, Bulletspeed);
             }
             else

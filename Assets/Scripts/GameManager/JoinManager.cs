@@ -127,6 +127,7 @@ public class JoinManager : MonoBehaviour
                
               CurrentTeam = Teams.Red;
 
+              playerScript.MyTeam = Teams.Red;
 
           }
 
@@ -136,6 +137,8 @@ public class JoinManager : MonoBehaviour
           
              
              CurrentTeam = Teams.Blue;
+
+             playerScript.MyTeam = Teams.Blue;
 
 
           }

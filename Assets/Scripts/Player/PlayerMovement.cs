@@ -601,4 +601,26 @@ public class PlayerMovement : MonoBehaviour
             ButtonCanvas.SetActive(false);
         }
     }
+
+
+    // DIR.X IS ASSOCIATED WITH -> THE X VALUE (-1 TO 1) //
+
+    // MULTIPLY MOVESPEED WITH IT//
+    private void MovePlayer()
+    {
+        
+         x = Input.GetAxisRaw("Horizontal");
+
+         z = Input.GetAxisRaw("Vertical");
+
+
+         dir = (transform.right * x) + (transform.forward * z);
+
+        
+         dir = dir.normalized;
+
+         rb.linearVelocity = new Vector3(dir.x, rb.linearvelocity.y, dir.z);
+
+
+    }
 }

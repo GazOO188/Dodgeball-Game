@@ -17,7 +17,7 @@ public class DetectWalls : MonoBehaviour
 
 
     //THIS VARIABLE IS TO REMEMBER WHO SHOT THE BULLET FIRST TO PREVENT DAMAGE//
-    [SerializeField] public GameObject Owner;
+    [SerializeField] public GameObject Owner, OwnerRef;
 
   
     void Start()
@@ -132,7 +132,11 @@ public class DetectWalls : MonoBehaviour
         if (collision.gameObject.CompareTag("Player") && isFlying)
         {
 
+                //GET THE PLAYERMOVEMENT SCRIPT OF THE PLAYER STRUCK BY THE BULLET//
                 PlayerMovement Obj = collision.gameObject.GetComponent<PlayerMovement>();
+
+
+          
                 
                  // IF THIS IS THE PERSON WITH THE BULLET, DON'T MAKE IT COUNT TOWARDS DAMAGE
                  if(Obj == null) return;
@@ -140,22 +144,19 @@ public class DetectWalls : MonoBehaviour
                  
               
                  // GET THE SCRIPT OF THE PLAYER WHO SHOT THE BULLET
-                 if (Owner != null)
+                 if (OwnerRef != null)
                  {
-                    
-                    PlayerMovement Shooter = collision.gameObject.GetComponent<PlayerMovement>();
-
-                            //IF THE SHOOTER TEAM AND TEAMAMATE ARE ON THE SAME TEAM DON'T MAKE TEAMMATE TAKE DAMAGE (FRIENDLY FIRE OFF)//
-                            if(Shoot != null && Shooter.MyTeam == Obj.MyTeam)
-                             {
-                    
-                                return;
+                    // GET THE PLAYERMOVEMENT SCRIPT FROM THE SHOOTER WHO SHOT THE BULLET//
+                     PlayerMovement Shooter = OwnerRef.GetComponent<PlayerMovement>();
 
 
-                             }
+                    //IF THE SHOOTER AND PERSON WHO GOT HIT ARE ON THE SAME TEAM, RETRUN SKIP THE DAMAGE COUNTING//
+                     if (Shooter != null && Shooter.MyTeam == Obj.MyTeam)
+                     {
+                          return; 
+                     }
 
-
-                 }
+                  }                       
 
 
            
@@ -226,4 +227,7 @@ public class DetectWalls : MonoBehaviour
 
 
     }
+
+
+   
 }

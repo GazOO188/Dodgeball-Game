@@ -1156,7 +1156,7 @@ MonoBehaviour:
   ShootBehavior: {fileID: 2030841692140558080}
   speed: 8.24
   RotationSpeed: 992.6
-  DashForce: 36.75
+  DashForce: 18.8
   JumpForce: 5.05
   gravityForce: 2.53
   rb: {fileID: 962883642193802899}
@@ -1175,8 +1175,9 @@ MonoBehaviour:
     m_Bits: 64
   catchRadius: 0.66
   SphereOffset: 2.52
-  CatchTimer: 0.5
   VectorOffset: {x: 0.7, y: 0.36, z: -1.51}
+  CatchTimer: 0.5
+  MyTeam: 0
 --- !u!114 &2030841692140558080
 MonoBehaviour:
   m_ObjectHideFlags: 0
