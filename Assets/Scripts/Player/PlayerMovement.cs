@@ -163,8 +163,7 @@ public class PlayerMovement : MonoBehaviour
             {
                 
                  GroundPos = children.gameObject.transform;
-                 
-                 
+                  
                  return;
 
 
@@ -590,7 +589,7 @@ public class PlayerMovement : MonoBehaviour
     {
         if (ButtonCanvas != null) 
         {
-            Debug.LogWarning("JoinManager tried to assign an external canvas");
+            Debug.LogWarning("JoinManager assigned");
             return; 
         }
 
@@ -609,17 +608,17 @@ public class PlayerMovement : MonoBehaviour
     private void MovePlayer()
     {
         
-         x = Input.GetAxisRaw("Horizontal");
+        // x = Input.GetAxisRaw("Horizontal");
 
-         z = Input.GetAxisRaw("Vertical");
+       //  z = Input.GetAxisRaw("Vertical");
 
 
-         dir = (transform.right * x) + (transform.forward * z);
+       //  dir = (transform.right * x) + (transform.forward * z);
 
         
-         dir = dir.normalized;
+         //dir = dir.normalized;
 
-         rb.linearVelocity = new Vector3(dir.x, rb.linearvelocity.y, dir.z);
+        // rb.linearVelocity = new Vector3(dir.x, rb.linearvelocity.y, dir.z);
 
 
     }

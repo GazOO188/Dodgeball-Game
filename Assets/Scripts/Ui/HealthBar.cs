@@ -10,6 +10,7 @@ public class HealthBar : MonoBehaviour
     [SerializeField] private float CurrentHealth;
 
 
+    //SLIDER INFO//
     [Header("Ui Info")]
     public Slider HealthSlider;
 
@@ -42,10 +43,15 @@ public class HealthBar : MonoBehaviour
     public void DecreaseHealthVisually(float DamageAmount)
     {
         
+        //DEDUCTS DAMAGE//
         CurrentHealth -= DamageAmount;
 
+
+        //CLAMPS HEALTH SO THAT IT DOSENT GO BELOW 0//
         CurrentHealth = Mathf.Clamp(CurrentHealth, 0, MaxHealth);
        
+
+        //SETS THE HEALTH BAR VALUE TO BE THE CURRENT HEALTH (VISUALLY)//
         HealthSlider.value = CurrentHealth;
 
 

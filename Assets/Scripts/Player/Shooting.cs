@@ -57,7 +57,7 @@ public class Shooting : MonoBehaviour
             }
             else
             {
-                // Fallback physics launch if the script is missing
+                // FALLBACK PHYSICS//
                 if (rb != null) rb.linearVelocity = BulletPos.forward * Bulletspeed;
             }
 
@@ -66,7 +66,7 @@ public class Shooting : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("No bullet reference held to shoot!");
+            Debug.LogWarning("No bullet reference");
         }
     }
 }

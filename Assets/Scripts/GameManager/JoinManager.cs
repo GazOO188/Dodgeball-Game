@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.InputSystem; //INCLUDE THIS NAMESPACE FOR INPUTACTION//
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.SceneManagement;
 
 public class JoinManager : MonoBehaviour
 {
@@ -48,6 +49,8 @@ public class JoinManager : MonoBehaviour
         if (JoinInstance == null)
         {
             JoinInstance = this;
+
+
         }
         else
         {
@@ -71,7 +74,16 @@ public class JoinManager : MonoBehaviour
     //THIS FUNCTION IS CALLED WHEN A PLAYER JOINS THE GAME ON BUTTON INPUT/PRESS
     public void OnPlayerJoined(PlayerInput playerInput)
     {
-         
+            //IF IN THE MAIN MENU, DON'T TRIGGER THIS JOIN FUNCTION//
+
+             if(SceneManager.GetActiveScene().name != "Main Menu")
+            {
+                Debug.LogWarning("Player tried to join, but we are not in the gameplay scene!");
+                return; // This completely stops the function from running in menus
+            }
+
+
+
            // DEBUG//
            Debug.Log("PLAYERJOINED!");
 
@@ -110,7 +122,7 @@ public class JoinManager : MonoBehaviour
           //SPAWN THE PLAYER AT THEIR SPAWN POINTS//  
 
           //IF THE PLAYERINDEX IS LESS THAN THE PLAYER SPAWN AMOUNTS THEN DO THIS, ELSE DON'T DO THIS CODE IF THERE A LOT OF PLAYERS/
-          if (PlayerIndex < PlayerSpawnPoints.Count && PlayerSpawnPoints[Index] != null)
+          if (PlayerIndex < PlayerSpawnPoints.Count && PlayerSpawnPoints[PlayerIndex] != null)
           {
                 //THIS ASSIGNS THE PLAYER'S TO THEIR POSITION ON THE MAP WITH CORRECT POSITION AND ROTATION//
                 playerInput.transform.position = PlayerSpawnPoints[PlayerIndex].position;
