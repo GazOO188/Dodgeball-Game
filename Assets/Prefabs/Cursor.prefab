@@ -87,9 +87,9 @@ GameObject:
   - component: {fileID: -4812156655895097862}
   - component: {fileID: -3599482364803924251}
   - component: {fileID: 8727521822153067029}
-  - component: {fileID: 462339742481699015}
-  - component: {fileID: 2713145612957993144}
+  - component: {fileID: 6809106866606441219}
   - component: {fileID: 2847250021440475001}
+  - component: {fileID: 2713145612957993144}
   m_Layer: 5
   m_Name: Cursor
   m_TagString: Untagged
@@ -145,6 +145,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DetectButtons
   cursorRect: {fileID: 5743779748679819515}
   CurrentButton: {fileID: 0}
+  IsonRed: 0
+  IsonBlue: 0
 --- !u!222 &8727521822153067029
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -153,7 +155,7 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8479452764810145152}
   m_CullTransparentMesh: 1
---- !u!114 &462339742481699015
+--- !u!114 &6809106866606441219
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -162,41 +164,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 8479452764810145152}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 829d9df096e034a73aa40636704d8c4f, type: 3}
+  m_Script: {fileID: 11500000, guid: 2e0c270fc15be472eadf67e98da73f53, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::UIInteraction
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerInputHandler
   Db: {fileID: -3599482364803924251}
   PI: {fileID: 2847250021440475001}
---- !u!114 &2713145612957993144
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8479452764810145152}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
-  m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 0
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
-  m_Maskable: 1
-  m_OnCullStateChanged:
-    m_PersistentCalls:
-      m_Calls: []
-  m_Sprite: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
-  m_Type: 0
-  m_PreserveAspect: 0
-  m_FillCenter: 1
-  m_FillMethod: 4
-  m_FillAmount: 1
-  m_FillClockwise: 1
-  m_FillOrigin: 0
-  m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
+  Submitted: 0
 --- !u!114 &2847250021440475001
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -271,7 +244,19 @@ MonoBehaviour:
     m_ActionId: c95b2375-e6d9-4b88-9c4c-c5e76515df4b
     m_ActionName: 'UI/Navigate[/XboxGamepadMacOSWireless/leftStick/up,/XboxGamepadMacOSWireless/rightStick/up,/XboxGamepadMacOSWireless/leftStick/down,/XboxGamepadMacOSWireless/rightStick/down,/XboxGamepadMacOSWireless/leftStick/left,/XboxGamepadMacOSWireless/rightStick/left,/XboxGamepadMacOSWireless/leftStick/right,/XboxGamepadMacOSWireless/rightStick/right,/XboxGamepadMacOSWireless/dpad,/Keyboard/w,/Keyboard/upArrow,/Keyboard/s,/Keyboard/downArrow,/Keyboard/a,/Keyboard/leftArrow,/Keyboard/d,/Keyboard/rightArrow]'
   - m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 6809106866606441219}
+        m_TargetAssemblyTypeName: PlayerInputHandler, Assembly-CSharp
+        m_MethodName: OnSubmit
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
     m_ActionId: 7607c7b6-cd76-4816-beef-bd0341cfe950
     m_ActionName: 'UI/Submit[/XboxGamepadMacOSWireless/buttonSouth,/Keyboard/enter]'
   - m_PersistentCalls:
@@ -311,3 +296,33 @@ MonoBehaviour:
   m_DefaultActionMap: UI
   m_SplitScreenIndex: -1
   m_Camera: {fileID: 0}
+--- !u!114 &2713145612957993144
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8479452764810145152}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 0
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
+  m_Type: 0
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1

@@ -25,11 +25,19 @@ public class DetectButtons : MonoBehaviour
      [SerializeField] public Button CurrentButton;
      
      //THIS IS INFORMATION ABOUT WHAT THE CURSOR IS DOING/
-     // POINTEREVENTDATA IS A CUSTOM DATA TYPE FOR A THING THAT BEHAVES AS A POINTING DEVICE//
+     //POINTEREVENTDATA IS A CUSTOM DATA TYPE FOR A THING THAT BEHAVES AS A POINTING DEVICE//
+     
+     //THIS DATA TYPE IS A PACKAGE OF DATA THAT MIMICS A MOUSE POINTER, THAT TELLS WHERE THE CURSOR IS HOVERING OVER//
      private PointerEventData pointerData;
 
      //THIS STORED ALL THE UI ELEMENTS THAT THE UI CURSOR TOUCHES//
      private List<RaycastResult> raycastResults = new List<RaycastResult>();
+
+
+     [Header("Bools")]
+
+     [SerializeField] public bool IsonRed = false; 
+     [SerializeField] public bool IsonBlue = false;
 
    
    
@@ -73,7 +81,10 @@ public class DetectButtons : MonoBehaviour
         }
 
         //WorldToScreenPoint -> TAKES A POINT IN THE GAME WORLD AND TURN IT INTO A POINT ON THE SCREEN//
+        
         //THIS LINE READS THE POSITION OF THE UI CURSOR ON THE SCREEN AND TURNS IT INTO A SCREEN POINT//
+
+        //CONVERTS THE CURSOR'S 3D LOCATION TO A 2D SCREEN COORDINATE//
         pointerData.position = RectTransformUtility.WorldToScreenPoint(null, cursorRect.position);
 
         
@@ -86,24 +97,52 @@ public class DetectButtons : MonoBehaviour
 
         //EVERY FRAME EMPTIES OUT THE BUTTON THIS FRAME BUTTON -> SET TO NULL//
         Button ButtonThisFrame = null;
+
+
+        //EVERY FRAME THIS SETS ISONRED && ISONBLUE TO FALSE FOR DETECTING WHICH BUTTON IS THE CURSOR ON//
+        IsonRed = false;
+        IsonBlue = false;
        
 
         //CHECKS EVVERY RAYCAST HIT//
         foreach(RaycastResult hit in raycastResults)
         {
-            
-            //IF A GAMEOBJECT NAMED "RED TEAM BUTTON" IS DETECTED?/
-            if(hit.gameObject.name == "Red Team Button")
+           
+            //GET BUTTON COMPONENT//
+            Button foundButton = hit.gameObject.GetComponentInParent<Button>();
+
+
+            if(foundButton != null)
             {
-                
-                Debug.Log("Found Item");
+            
+              ButtonThisFrame = foundButton;
+              
 
-                //GET THE BUTTON ON THE GAMEOBJECT//
-                ButtonThisFrame = hit.gameObject.GetComponent<Button>();
+              if(foundButton.gameObject.name == "Red Team Button")
+              {
+                    
+                 IsonRed = true;
+                 Debug.Log("Red");
 
-                break;
+                 //ADD THE PLAYER TO THEIR RESPECTIVE TEAM BY THEIR INT//
+                 //TeamManagerInstance.AssignTeams()
+
+              }
+
+             
+              else if(foundButton.gameObject.name == "Blue Team Button")
+              {
+                 IsonBlue = true;
+                 Debug.Log("BLUE");
+              
+              }
+
+              break;
+
 
             }
+
+
 
 
 
