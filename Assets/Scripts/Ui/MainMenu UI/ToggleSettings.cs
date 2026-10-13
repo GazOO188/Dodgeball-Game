@@ -1,18 +1,25 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 using TMPro;
+
 
 public class ToggleSettings : MonoBehaviour
 {
     
      //---THIS SCRIPT HANDLES TOGGLE SETTINGS----//
     
-     [SerializeField] private RectTransform backgroundRect;
+    [SerializeField] private RectTransform backgroundRect;
+
+    [SerializeField] private TextMeshProUGUI PlayerText;
+
+
+    private PlayerInput PiReference;
      
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        
+        HandleToggleSettings(PiReference);
     }
 
     // Update is called once per frame
@@ -24,7 +31,7 @@ public class ToggleSettings : MonoBehaviour
 
     //---FUNCTION TO HANDLE TOGGLE SETTINGS---//
 
-    public void HandleToggleSettings()
+    public void HandleToggleSettings(PlayerInput Pi)
     {
         
         //SCALES | ADJUST POSITION | AND KEEP IT ANCHORED//
@@ -36,6 +43,29 @@ public class ToggleSettings : MonoBehaviour
         }
 
 
+
+        //CHANGE TEXT//
+        if(PlayerText != null)
+        {
+            
+            PlayerText.text = "Player " + PiReference.playerIndex;
+
+
+
+        }
+
+
+
+    }
+
+
+
+    //GET A REFERENCE TO PLAYERINPUT//
+    public void RetrievePlayerInput(PlayerInput Pi)
+    {
+        
+
+       PiReference = Pi;
 
 
 

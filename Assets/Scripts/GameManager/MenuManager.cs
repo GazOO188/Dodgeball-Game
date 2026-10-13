@@ -3,6 +3,7 @@ using UnityEngine.InputSystem; //INCLUDE THIS NAMESPACE FOR INPUTACTION//
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using System;
 
 public class MenuManager : MonoBehaviour
 {
@@ -21,12 +22,16 @@ public class MenuManager : MonoBehaviour
 
     public Dictionary<int, DetectButtons> PlayerWithDBScript = new Dictionary<int, DetectButtons>();
    
-    
-    private Dictionary<int, TeamChoice.Teams> PlayerTeamTracker = new Dictionary<int, TeamChoice.Teams>();
+
 
 
     //DICTIONARY THAT TRACKS  PLAYER TO THEIR TOGGLE//
     private Dictionary<int, GameObject> PlayerToggle = new Dictionary<int, GameObject>();
+
+
+
+    //---TEAM EVENTS---//
+    public event Action<PlayerInput, TeamChoice.Teams> OnTeamSubmitted;
 
    
 
@@ -85,11 +90,12 @@ public class MenuManager : MonoBehaviour
          ///THIS LINKS THE EVENTS TO THEIR RESPECTIVE FUNCTIONS
          
          PIH.OnSubmitPressed += SpawnToggle;
-         
-         PIH.OnTeamSubmitted += TeamChoice.TeamManagerInstance.HandleTeamAssignment;
-
          PIH.CancelToggleChoice += RemoveToggleOnScreen;
 
+         //THIS LINKS THE ONTEAMSUBMIITED EVENT IN PLAYERINPUTHANDLER TO TRIGGERTEAMSUBMISSIONFULLY//
+         PIH.OnTeamSubmitted += TriggerTeamSubmissionFully;
+
+        
 
         }
 
@@ -122,6 +128,13 @@ public class MenuManager : MonoBehaviour
         Transform TargetLocations = null;
 
 
+        //GET THE PLAYERINPUTHANDLER SCRIPT//
+        PlayerInputHandler PiH = Pi.gameObject.GetComponent<PlayerInputHandler>();
+
+        
+
+
+        //RETURNS(EXITS) IF THE SCRIPT ATTACHED TO THE PLAYER CAN'T BE FOUND//
         if (!PlayerWithDBScript.TryGetValue(PlayerIndex, out DetectButtons playerWithDbScript))
         {
             return; 
@@ -132,6 +145,7 @@ public class MenuManager : MonoBehaviour
         {
             
             //Debug.Log("Hey it does");
+            
             return;
 
         }
@@ -142,6 +156,7 @@ public class MenuManager : MonoBehaviour
         {
 
 
+            //IS ISONRED IS TRUE -> SPAWN THE TOGGLE AT THE RED SIDE BUTTON//
             if (playerWithDbScript.IsonRed)
             {
                 
@@ -151,6 +166,8 @@ public class MenuManager : MonoBehaviour
 
             }
 
+
+            //IS ISONBLUE IS TRUE -> SPAWN THE TOGGLE AT THE BLUE SIDE BUTTON//
             else if(playerWithDbScript.IsonBlue)
             {
                 
@@ -161,40 +178,33 @@ public class MenuManager : MonoBehaviour
             }
 
 
+            
             if(TargetLocations != null)
-        {
+           {
+           
             //SPAWN THE TOGGLE -> THIS PUTS THE TOGGLE IN THE UICANVAS SO IT APPEARS ON THE CANVAS
             ToggletoSpawn = Instantiate(TogglePrefab, UICanvas); 
 
             //THIS MAPS THE TOGGLE TO THEIR CORRECT LOCATIONS
             ToggletoSpawn.transform.position = TargetLocations.position;
+
+            //GET THE TOGGLESETTINGS SCRIPT//
+            ToggleSettings TS = ToggletoSpawn.GetComponent<ToggleSettings>();
+
+
+            //GETTING PLAYER INPUT REFERENCE//
+            TS.RetrievePlayerInput(Pi);
+            
             
 
-            //GET THE BACKGROUND COMPONENT ON THE CHILD OF THE TOGGLE
-            Transform Background = ToggletoSpawn.transform.Find("Background");
-
-            
-            if (Background != null)
-            {
-                // ADJUST THE SCALE OF THE TOGGLE BACKGROUND
-                Background.transform.localScale = new Vector3(0.7453667f, 0.7453667f, 0.7453667f);
-
-                
-                //GET THE RECT TRANSFORM AND MAKE IT CENETERED AROUND THE POSITION OF THE TOGGLE//
-                RectTransform bgRect = Background.GetComponent<RectTransform>();
-                if (bgRect != null)
-                {
-                    bgRect.anchoredPosition = Vector2.zero;
-                    bgRect.localPosition = Vector3.zero;
-                }
-            }
-
-
-  
+    
             //ADD THE PLAYER'S TOGGLE TO THE DICTIONARY
             PlayerToggle.Add(PlayerIndex, ToggletoSpawn);
+           
+           }
+    
+    
         }
-    }
 }
 
    
@@ -203,9 +213,10 @@ public class MenuManager : MonoBehaviour
      private void RemoveToggleOnScreen(PlayerInput PI)
     {
       
+        //GET PLAYERINDEX VALUE//
         int playerIndex = PI.playerIndex;
 
-
+        //IF THE TOGGLE EXISTS, DESTROY IT//
         if (PlayerToggle.TryGetValue(playerIndex, out GameObject Toggle))
         {
 
@@ -219,12 +230,25 @@ public class MenuManager : MonoBehaviour
         }
 
 
-
     }
 
 
+    //-----FUNCTION TO FULLY TRIGGER THE EVENT-----//
+    private void TriggerTeamSubmissionFully(PlayerInput Pi, TeamChoice.Teams teams)
+    {
+        
 
+        //MAKE THIS VERSION OF ONTEAMSUBMITTED EVENT THAT IS LINKED TO THE TEAMCHOICE FUNCTION, TRIGGER//
+        OnTeamSubmitted?.Invoke(Pi, teams);
+
+
+
+    }
+
+    
   
+
+
 
   
 

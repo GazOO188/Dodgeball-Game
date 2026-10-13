@@ -20,9 +20,13 @@ public class PlayerInputHandler : MonoBehaviour
    
     //WHEN THIS EVENT HAPPENS IT WILL SEND PLAYERINPUT INFORMATION TO THE FUNCTION IT IS SUBSCRIBED TO//
     public event Action<PlayerInput> OnSubmitPressed;
-    
+
+
     //---TEAM EVENTS---//
     public event Action<PlayerInput, TeamChoice.Teams> OnTeamSubmitted;
+
+    
+    public event Action<PlayerInput, TeamChoice.Teams> OnBothPlayersSubmitted;
 
 
     //---CANCEL EVENT---//
@@ -99,6 +103,8 @@ public class PlayerInputHandler : MonoBehaviour
     //THIS FUNCTION IS FOR PRESSING A ON THE UI WHEN SELECTING TEAM COLOR//
     private void OnSubmit(InputAction.CallbackContext context)
     {
+
+        int PlayerIndex = PI.playerIndex;
         
         if(Db == null)
         {
@@ -109,9 +115,17 @@ public class PlayerInputHandler : MonoBehaviour
 
         if(context.performed)
         {
-
+            
+            //PREVENTS SPAMMING//
+            if (Submitted)
+            {
+                return;
+            }
 
             Debug.Log("Julius Pizarro");
+
+           
+            Submitted = true;
 
 
             OnSubmitPressed?.Invoke(PI);
@@ -122,9 +136,16 @@ public class PlayerInputHandler : MonoBehaviour
 
 
             //THIS GIVES THE PLAYERINPUT AND THE CHOSENTEAM VARIABLE AS INFO FOR THE EVENT FUNCTION//
+
+            //CONNECT THIS TO THE TRIGGERFULLY FUNCTION
             OnTeamSubmitted?.Invoke(PI, ChosenTeam);
+
+
             
-            
+            OnBothPlayersSubmitted?.Invoke(PI, ChosenTeam);
+
+
+         
 
         }
 
@@ -140,11 +161,22 @@ public class PlayerInputHandler : MonoBehaviour
 
         if(context.performed)
         {
-            
+
+
+            if (!Submitted)
+            {
+                return;  
+
+            }
             Debug.Log("Cacnel Event Triggered");
 
 
             CancelToggleChoice?.Invoke(PI);
+
+            CancelToggleChoice?.Invoke(PI);
+
+
+            Submitted = false;
 
 
         }
@@ -156,5 +188,18 @@ public class PlayerInputHandler : MonoBehaviour
 
 
      // ------------------END OF UI INPUT ACTIONS------------------------------
+
+
+
+
+    public PlayerInput StorePlayer()
+    {
+        
+        return PI;
+
+
+
+    }
+
 
 }

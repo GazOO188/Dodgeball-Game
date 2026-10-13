@@ -70,87 +70,85 @@ public class DetectButtons : MonoBehaviour
 
 
     //FUNCTION TO DETECT UI//
+       //FUNCTION TO DETECT UI//
     private void DetectUIFromCursor()
     {
-        
         //EXITS OR STOP IF ONE OF THESE IS MISSING OR DOSEN'T EXIST//
         if(pointerData == null || cursorRect == null || EventSystem.current == null)
         {
-            
             return;
         }
 
-        //WorldToScreenPoint -> TAKES A POINT IN THE GAME WORLD AND TURN IT INTO A POINT ON THE SCREEN//
-        
-        //THIS LINE READS THE POSITION OF THE UI CURSOR ON THE SCREEN AND TURNS IT INTO A SCREEN POINT//
-
         //CONVERTS THE CURSOR'S 3D LOCATION TO A 2D SCREEN COORDINATE//
         pointerData.position = RectTransformUtility.WorldToScreenPoint(null, cursorRect.position);
-
         
         raycastResults.Clear();
 
-        
-        //THIS CASTS A RAY FROM THE UI CURSOR AND HITS ALL ITEMS OR THINGS THAT ARE IN THE WAY OF THE RAYCAST
+        //THIS CASTS A RAY FROM THE UI CURSOR
         EventSystem.current.RaycastAll(pointerData, raycastResults);
-
 
         //EVERY FRAME EMPTIES OUT THE BUTTON THIS FRAME BUTTON -> SET TO NULL//
         Button ButtonThisFrame = null;
 
-
-        //EVERY FRAME THIS SETS ISONRED && ISONBLUE TO FALSE FOR DETECTING WHICH BUTTON IS THE CURSOR ON//
+        //EVERY FRAME THIS SETS ISONRED && ISONBLUE TO FALSE
         IsonRed = false;
         IsonBlue = false;
        
-
-        //CHECKS EVVERY RAYCAST HIT//
+        //CHECKS EVERY RAYCAST HIT//
         foreach(RaycastResult hit in raycastResults)
         {
-           
             //GET BUTTON COMPONENT//
             Button foundButton = hit.gameObject.GetComponentInParent<Button>();
 
-
             if(foundButton != null)
             {
-            
-              ButtonThisFrame = foundButton;
+                ButtonThisFrame = foundButton;
               
+                if(foundButton.gameObject.name == "Red Team Button")
+                {
+                    IsonRed = true;
+                    Debug.Log("Red");
+                }
+                else if(foundButton.gameObject.name == "Blue Team Button")
+                {
+                    IsonBlue = true;
+                    Debug.Log("BLUE");
+                }
+                else if(foundButton.gameObject.name == "Ready Button")
+                {
+                    Debug.Log("Start detected");
+                }
 
-              if(foundButton.gameObject.name == "Red Team Button")
-              {
-                    
-                 IsonRed = true;
-                 Debug.Log("Red");
-
-                 //ADD THE PLAYER TO THEIR RESPECTIVE TEAM BY THEIR INT//
-                 //TeamManagerInstance.AssignTeams()
-
-              }
-
-             
-              else if(foundButton.gameObject.name == "Blue Team Button")
-              {
-                 IsonBlue = true;
-                 Debug.Log("BLUE");
-              
-              }
-
-              break;
+               
+                break;
+            }
+        } 
 
 
+        //THIS IS SAYING IF THE BUTTON THIS FRAME IS A DIFFERENT BUTTON THEN CURRENTBUTTON//
+        if(ButtonThisFrame != CurrentButton)
+        {
+          
+
+            //THIS IF STATEMENT EXITS THE HIGHLIGHTING ANIMATION//
+            if (CurrentButton != null)
+            {
+                CurrentButton.OnPointerExit(pointerData); 
             }
 
+          
 
+            //THIS IF STATEMENT TRIGGERS THE HIGHLIGHTING ANIMATION ON THE READY BUTTON//
 
-
-
+            // THIS TRIGGERS BECAUSE WE EMPTY THE CURRENT BUTTON THE NEXT FRAME//
+            if (ButtonThisFrame != null)
+            {
+                ButtonThisFrame.OnPointerEnter(pointerData);
+            }    
         }
 
-        //STORE THE BUTTON//
+        //STORE THE BUTTON FOR NEXT FRAME CHECK//
         CurrentButton = ButtonThisFrame;
-
     }
 
 
