@@ -1,8 +1,15 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+//CURRENTLY WOEKING ON A WAY TO ACCESS THE EVENTMESSGENR IN THE MENUMANAGER IN A CLEAN LESS TIGHTLY COUPLED WAY FOR CANCELING OPTION//
+public interface IEventMessenger
+{
+    
+    void Cancel();
 
-public class EventMessenger : MonoBehaviour
+}
+
+public class EventMessenger : MonoBehaviour, IEventMessenger
 {
    
     
@@ -14,7 +21,16 @@ public class EventMessenger : MonoBehaviour
     [SerializeField] public MenuManager MM;
 
     [SerializeField] public UiManager UIM;
+
+
+    //A REFERENCE TO THE LOADGAMESCENE//
+    [SerializeField] private LoadGameScene targetScript; 
+
+    [SerializeField] private EventMessenger EM;
       
+    
+    
+    
     //LINK THE MENUMANAGER ONTEAMSUBMIT TO THE TEAMCHOICE HANDLETEAMASSIGNMENT FUNCTION//
     private void OnEnable()
     {
@@ -44,20 +60,65 @@ public class EventMessenger : MonoBehaviour
 
 
     }
-   
-   
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+
+
+    
     void Start()
     {
-        
-    }
+        //DRAG THE LOADGAMESCENE AND SAVES A REFERENCE TO IT, SO YOU CAN USE THE REFERENCE IN MENUMANAGER//
+        if(targetScript != null)
+        {
+            
+            //THIS FULLY STORES THE REFERENCE//
+            MM.StoreScriptReference(targetScript);
 
+
+        }
+
+
+        //DRAG THE EVENTMESSENGER AND SAVES A REFERENCE TO IT, SO YOU CAN USE THE REFERENCE IN MENUMANAGER//
+        if(EM != null)
+        {
+            
+
+            MM.StoreEventMessengerScript(EM);
+
+
+
+        }
+
+
+
+
+        //DRAG THE UIMANAGER AND SAVES A REFERENCE TO IT, SO YOU CAN USE THE REFERENCE IN LOADGAMESCENE//
+        if(UIM != null)
+        {
+            
+
+            targetScript.StoreUIAnimScript(UIM);
+
+
+        }
+
+    
+    
+    }
+   
+   
+   
     // Update is called once per frame
     void Update()
     {
         
     }
 
+
+
+
+
+
+
+    //THIS FUCNTION IS BEING USED: CONNECTED TO THE JOINMANAGER//
 
     public void TriggerTeamCheck(PlayerInput Pi)
     {
@@ -73,17 +134,62 @@ public class EventMessenger : MonoBehaviour
 
             Pih.OnBothPlayersSubmitted += UIM.ShowReadyButton; 
 
-
-            //WHEN PLAYER CANCELS THEIR TEAM OPTION, LINK THE CANCEL EVENT TO THE HIDEREADYBUTTON TO PLAY THE HIDE ANIMATION//
-            Pih.CancelToggleChoice += UIM.HideReadyButton;
-
-
             
         }
 
 
 
     }
+
+    
+
+
+
+    //FUNCTION A PART OF THE CONTRACT//
+    public void Cancel()
+    {
+        
+        if(targetScript != null)
+        {
+            
+            //A REFERENCE TO THE LOADSCENE SCRIPT//
+            targetScript.StopCurrentCoroutine();
+
+
+
+        }
+
+
+    }
+
+
+
+    //-----FUNCTION TO CLEAN UP EVENTS-----//
+    public void CleanUpEvents(PlayerInput pi)
+    {
+        
+        PlayerInputHandler PIH = pi.gameObject.GetComponent<PlayerInputHandler>();
+
+
+        if(PIH != null)
+        {
+            
+
+
+            PIH.OnBothPlayersSubmitted -= TC.CheckTeamSpots;
+
+            PIH.OnBothPlayersSubmitted -= UIM.ShowReadyButton; 
+
+
+        }
+
+
+
+
+    }
+
+
+
 
 
 

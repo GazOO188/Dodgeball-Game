@@ -3,8 +3,19 @@ using UnityEngine.UI;
 using System.Collections.Generic;
 using UnityEngine.SceneManagement;
 using UnityEngine.InputSystem;
+using UnityEngine.Playables;
+using System;
 
-public class UiManager : MonoBehaviour
+
+public interface IUiAnimation
+{
+    void HideReadyButton();
+    void PlayDirectorTransition();
+    void StopFadetoBlackAnim();
+}
+
+
+public class UiManager : MonoBehaviour, IUiAnimation
 {
     
     //THIS SCRIPT IS TO HANDLE ALL OF THE UI ELEMENTS (SHUTTING THEM OFF/ETC)
@@ -15,6 +26,9 @@ public class UiManager : MonoBehaviour
 
 
     [SerializeField] private Animator ReadyAnim;
+
+
+    [SerializeField] private PlayableDirector PD;
 
 
     void Awake()
@@ -101,7 +115,7 @@ public class UiManager : MonoBehaviour
     }
 
 
-    //-----FUNCTION TO HIDE THE READY BUTTON-----//
+    //-----FUNCTION TO HIDE THE READY BUTTON (EVENT VERSION)-----//
     public void HideReadyButton(PlayerInput Pi)
     {
         
@@ -131,6 +145,38 @@ public class UiManager : MonoBehaviour
 
 
     }
+
+    //-----FUNCTION TO HIDE THE READY BUTTON (REGULAR FUNCTION VERSION)-----//
+    public void HideReadyButton()
+    {
+        
+        
+        if(ReadyButton != null)
+        {
+
+            Button SrtButton = ReadyButton.GetComponent<Button>();
+
+
+            //THIS MAKES THE BUTTON NOT INTERACTABLE WHEN THE HIDE ANIMATION PLAYS//
+            if(SrtButton != null)
+            {
+                
+                SrtButton.interactable = false;
+
+            }
+
+            ReadyButton.SetActive(true);
+
+            
+            HandleCorrectAnimationClip("SlideOut");
+
+            
+
+        }
+
+
+    }
+
 
 
 
@@ -176,6 +222,45 @@ public class UiManager : MonoBehaviour
 
 
 
+
+
+    }
+
+
+    //-----FUNCTION TO PLAY THE ANIMATION TO TRANSITION TO THE GAME SCENE-----//
+    public void PlayDirectorTransition()
+    {
+        
+
+        PD.Play();
+
+
+
+    }
+
+
+
+    //-----FUNCTION TO STOP THE ANIMATION TO TRANSITION TO THE GAME SCENE-----//
+    public void StopFadetoBlackAnim()
+    {
+        
+
+        if(PD != null)
+        {
+             
+             PD.Stop();
+
+
+             PD.time = 0;
+
+
+             PD.Evaluate();
+ 
+
+
+        }
+
+      
 
 
     }

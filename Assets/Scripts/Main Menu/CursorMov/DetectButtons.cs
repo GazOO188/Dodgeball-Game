@@ -38,6 +38,7 @@ public class DetectButtons : MonoBehaviour
 
      [SerializeField] public bool IsonRed = false; 
      [SerializeField] public bool IsonBlue = false;
+     [SerializeField] public bool IsonReadyButton = false;
 
    
    
@@ -93,6 +94,7 @@ public class DetectButtons : MonoBehaviour
         //EVERY FRAME THIS SETS ISONRED && ISONBLUE TO FALSE
         IsonRed = false;
         IsonBlue = false;
+        IsonReadyButton = false;
        
         //CHECKS EVERY RAYCAST HIT//
         foreach(RaycastResult hit in raycastResults)
@@ -116,6 +118,7 @@ public class DetectButtons : MonoBehaviour
                 }
                 else if(foundButton.gameObject.name == "Ready Button")
                 {
+                    IsonReadyButton = true;
                     Debug.Log("Start detected");
                 }
 

@@ -21,6 +21,9 @@ public class PlayerInputHandler : MonoBehaviour
     //WHEN THIS EVENT HAPPENS IT WILL SEND PLAYERINPUT INFORMATION TO THE FUNCTION IT IS SUBSCRIBED TO//
     public event Action<PlayerInput> OnSubmitPressed;
 
+    
+    public event Action<PlayerInput, DetectButtons> OnStartButtonPressed;
+
 
     //---TEAM EVENTS---//
     public event Action<PlayerInput, TeamChoice.Teams> OnTeamSubmitted;
@@ -31,8 +34,8 @@ public class PlayerInputHandler : MonoBehaviour
 
     //---CANCEL EVENT---//
     public event Action<PlayerInput> CancelToggleChoice;
+    
 
-   
 
     [SerializeField] private bool Submitted = false;
 
@@ -105,22 +108,43 @@ public class PlayerInputHandler : MonoBehaviour
     {
 
         int PlayerIndex = PI.playerIndex;
+
+
+
         
-        if(Db == null)
+        if(Db == null || PI == null)
         {
             return;  
 
 
         }
 
+
+
         if(context.performed)
         {
+            
+            
+            
+            //LOGIC FOR WHEN THE UI CURSOR IS HOVERING OVER THE START BUTTON//
+            if(Db.CurrentButton != null && Db.IsonReadyButton)
+            {
+                
+                Debug.Log("On TOp");
+
+                OnStartButtonPressed?.Invoke(PI, Db);
+
+                return;
+
+            }
+
             
             //PREVENTS SPAMMING//
             if (Submitted)
             {
                 return;
             }
+
 
             Debug.Log("Julius Pizarro");
 
@@ -162,12 +186,13 @@ public class PlayerInputHandler : MonoBehaviour
         if(context.performed)
         {
 
-
+            //PREVENTS SPAMMING//
             if (!Submitted)
             {
                 return;  
 
             }
+           
             Debug.Log("Cacnel Event Triggered");
 
 

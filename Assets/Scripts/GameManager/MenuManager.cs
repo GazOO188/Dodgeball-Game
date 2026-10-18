@@ -13,6 +13,7 @@ public class MenuManager : MonoBehaviour
     [Header("UI Elements")]
     [SerializeField] private GameObject TogglePrefab;
     [SerializeField] private Transform UICanvas;
+    [SerializeField] private Transform SelectTeamUICanvas;
 
 
 
@@ -25,13 +26,21 @@ public class MenuManager : MonoBehaviour
 
 
 
-    //DICTIONARY THAT TRACKS  PLAYER TO THEIR TOGGLE//
+    //DICTIONARY THAT TRACKS PLAYER TO THEIR TOGGLE//
     private Dictionary<int, GameObject> PlayerToggle = new Dictionary<int, GameObject>();
 
 
 
     //---TEAM EVENTS---//
     public event Action<PlayerInput, TeamChoice.Teams> OnTeamSubmitted;
+    
+
+   
+    //---REF TO THE SCRIPT WITH THE INTERFACE(LOADGAMESCENE)---//
+    private ISceneLoader sceneLoader;
+
+    
+    private IEventMessenger eventMessenger;
 
    
 
@@ -58,6 +67,27 @@ public class MenuManager : MonoBehaviour
     {
     
     }
+
+    
+    //THIS FUNCTION STORES A REFERENCE TO THE LOADGAME SCENE SCRIPT//
+    public void StoreScriptReference(ISceneLoader incomingReference)
+    {
+       
+        sceneLoader = incomingReference;
+        
+    }
+
+
+    //-----THIS FUNCTION IS TO STORE A REFERENCE TO THE EVENTMESSENGER SCRIPT-----//
+    public void StoreEventMessengerScript(IEventMessenger incomingReference)
+    {
+        
+
+        eventMessenger = incomingReference;
+
+
+    }
+
 
 
     //JOIN FUNCTION//
@@ -91,9 +121,14 @@ public class MenuManager : MonoBehaviour
          
          PIH.OnSubmitPressed += SpawnToggle;
          PIH.CancelToggleChoice += RemoveToggleOnScreen;
+         PIH.CancelToggleChoice += HandleTimeCancel;
 
+        
          //THIS LINKS THE ONTEAMSUBMIITED EVENT IN PLAYERINPUTHANDLER TO TRIGGERTEAMSUBMISSIONFULLY//
          PIH.OnTeamSubmitted += TriggerTeamSubmissionFully;
+
+
+         PIH.OnStartButtonPressed += TriggerStartButton;
 
         
 
@@ -200,12 +235,28 @@ public class MenuManager : MonoBehaviour
     
             //ADD THE PLAYER'S TOGGLE TO THE DICTIONARY
             PlayerToggle.Add(PlayerIndex, ToggletoSpawn);
+
            
            }
+
+
+
+            // THIS KEEPS THE PLAYER'S CURSOR IN THE UI CANVAS SO IT'S SEEN//
+            if (UICanvas != null)
+            {
+            
+            //THIS SETS THE TOGGLE THAT SPAWNED TO BE A CHILD OF THE TEAMUI CANVAS//
+             ToggletoSpawn.transform.SetParent(SelectTeamUICanvas, false);
+
+             //MAKE THE TOGGLE THAT SPAWNED APPEAR 2 IN THE CHILD LIST SO THAT IT DOSEN'T BE OVERLAY OR BE ON TOP OF THE TRANSTION ANIMATION//
+             ToggletoSpawn.transform.SetSiblingIndex(2);
+        
+            }
     
     
         }
-}
+        
+        }
 
    
 
@@ -233,7 +284,28 @@ public class MenuManager : MonoBehaviour
     }
 
 
-    //-----FUNCTION TO FULLY TRIGGER THE EVENT-----//
+    //-----FUNCTION TO HANDLE STOPPING THE COUNTDOWN COROUTINE-----//
+    private void HandleTimeCancel(PlayerInput PI)
+    {
+        
+        IEventMessenger Ievent = eventMessenger;
+
+
+        if(Ievent != null)
+        {
+            
+
+
+            Ievent.Cancel();
+        }
+
+
+
+
+    }
+
+
+    //-----FUNCTION TO FULLY TRIGGER THE ONTEAMSUBMMITED EVENT-----//
     private void TriggerTeamSubmissionFully(PlayerInput Pi, TeamChoice.Teams teams)
     {
         
@@ -245,7 +317,34 @@ public class MenuManager : MonoBehaviour
 
     }
 
-    
+
+    //-----FUNCTION TO FULLY TRIGGER THE ONSTARTBUTTONCLICKED EVENT-----//
+    private void TriggerStartButton(PlayerInput PI, DetectButtons DB)
+    {
+        
+
+        //GET THE LOADGAMESCENE SCRIPT//
+        ISceneLoader LGS = sceneLoader;
+
+
+        //GET THE PLAYERINPUTHANDLER SCRIPT//
+        PlayerInputHandler PiH = PI.gameObject.GetComponent<PlayerInputHandler>();
+
+
+        if(LGS != null && PiH != null)
+        {
+            
+            LGS.Execute();
+
+           // PiH.CancelToggleChoice -= RemoveToggleOnScreen;
+
+
+
+        }
+
+
+
+    }
   
 
 
