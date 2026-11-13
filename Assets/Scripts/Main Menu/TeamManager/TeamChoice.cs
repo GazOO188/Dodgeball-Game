@@ -2,7 +2,30 @@ using UnityEngine;
 using System.Collections.Generic; // ---> FOR DICTIONARIES//
 using UnityEngine.InputSystem; 
 
-public class TeamChoice : MonoBehaviour
+
+public interface ITeamManager
+{
+    
+    //REFERENCE TO THE PLAYERTEAMTRACKER INT//
+
+    int PlayerCount{get;}
+
+    void HandleTeamAssignment(PlayerInput Pi, TeamChoice.Teams PlayerTeams);
+
+    void CheckTeamSpots(PlayerInput pi, TeamChoice.Teams PlayerTeams);
+
+    void HandleTeamAddition(int playerID, TeamChoice.Teams PlayerTeams);
+
+    void HandleTeamRemoval(int playerID, TeamChoice.Teams PlayerTeams);
+
+
+    Dictionary<int, TeamChoice.Teams> PlayerTeamTracker{get;}
+
+
+}
+
+
+public class TeamChoice : MonoBehaviour, ITeamManager
 {
 
     public static TeamChoice TeamManagerInstance{get; private set;}
@@ -27,10 +50,38 @@ public class TeamChoice : MonoBehaviour
     [SerializeField] private UniversalGM UGM;
 
 
+    //DICTIONARY TO STORE THE PLAYER AND THEIR CORRESPONDING TEAM//
+    public Dictionary<int, Teams> playerTeamTracker = new Dictionary<int, Teams>();
+    
+    
 
-    private Dictionary<int, Teams> PlayerTeamTracker = new Dictionary<int, TeamChoice.Teams>();
+    //A PROPERTY (READ-ONLY) FOR DICTIONARY//
+    public Dictionary<int, Teams> PlayerTeamTracker
+    {
+
+        get
+        {
+            return playerTeamTracker;
+        }
+
+
+
+    }
+
+
+    //A PROPERTY (READ-ONLY) FOR AN INT VAIRIABLE//
+    public int PlayerCount
+    {
+        
+        get{return PlayerTeamTracker.Count;}
+
+    }
+
+
+    //REFERENCE TO UIMANAGER//
+    private IUiAnimation UIManagerScript;
    
-   void Awake()
+    void Awake()
     {
 
         ///DECLARING || SAVING INSTANCE OF THIS JOINMANAGER//
@@ -41,6 +92,7 @@ public class TeamChoice : MonoBehaviour
 
         }
         
+       
         else
         {
             Destroy(gameObject);
@@ -49,16 +101,16 @@ public class TeamChoice : MonoBehaviour
     
     }
     
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
+  
+    //STORE A REFERENCE TO THE UIMANAGER//
 
-    // Update is called once per frame
-    void Update()
+    public void StoreUIManagerScriptref(IUiAnimation UIManRef)
     {
-        
+
+        UIManagerScript = UIManRef;  
+
+
+
     }
 
 
@@ -150,24 +202,90 @@ public class TeamChoice : MonoBehaviour
 
     }
 
+
+    //-----FUNCTION TO HANDLE REMOVING PLAYER TEAM ENTRIES-----//
+    public void HandleTeamRemoval(int PlayerID, Teams PlayerTeams)
+    {
+        
+        
+        if(playerTeamTracker.ContainsKey(PlayerID))
+        {
+            
+            playerTeamTracker.Remove(PlayerID);
+
+
+            if (UGM.UniversalTeamData.ContainsKey(PlayerID))
+            {
+                
+                UGM.UniversalTeamData.Remove(PlayerID);  
+
+
+            }
+
+            
+
+
+        }
+
+
+
+
+    }
+
+
+    //-----FUNCTION TO HANDLE ADDING TEAM ENTIRES-----//
+    public void HandleTeamAddition(int PlayerIndex, Teams PlayerTeams)
+    {
+        
+      
+        //IF THE PLAYER INDEX ISN'T IN THE DICTIONARY, ADD THE PLAYERINDEX TO THE PLAYERTEAMTRACKER//
+        if(!playerTeamTracker.ContainsKey(PlayerIndex))
+        {
+            
+            //ADD THE PLAYERINDEX TO THE TEAM DICTIONARY TRACKER//
+            playerTeamTracker.Add(PlayerIndex, PlayerTeams);
+
+
+            //ALSO ADD THE INDEX TO THE UINIVERSALTEAM DATA DICTIONARY//
+            if(UGM != null && !UGM.UniversalTeamData.ContainsKey(PlayerIndex))
+            {
+                
+               UGM.UniversalTeamData.Add(PlayerIndex, PlayerTeams);  
+
+
+
+            }
+            
+           
+
+        }
+
+
+
+    }
+
     
     //-----FUNCTION TO HANDLE WHAT HAPPENS WHEN BOTH PLAYERS CHOOSE THEIR TEAM-----//
     public void CheckTeamSpots(PlayerInput pi, Teams PlayerTeams)
     {
         
+        //GET THE PLAYER INDEX//
         int PlayerIndex = pi.playerIndex;
 
-        if(PlayerTeamTracker.Count <= 2)
+       
+        //IF THE PLAYERTEAMTRACKER CAPACITY IS 2: DO THE CODE BELOW//
+        if(PlayerTeamTracker.Count == 2)
         {
 
 
             if (PlayerTeamTracker.ContainsKey(PlayerIndex))
             {
                 
-                if(PlayerTeamTracker.TryGetValue(0, out Teams P1Team))
+                if(PlayerTeamTracker.TryGetValue(0, out Teams P1Team) && PlayerTeamTracker.TryGetValue(1, out Teams P2Team))
                 {
                     
-
+                    //THIS SHOWS THE START BUTTON ONCE THE PLAYERS ARE LOCKED ON THEIR TEAMS//
+                    UIManagerScript.ShowReadyButton();
                     Debug.Log("Team Spot Filled");
 
 
@@ -187,7 +305,7 @@ public class TeamChoice : MonoBehaviour
 
 
 
- //-----FUNCTION TO LOOP THROUGH AND PRINT ALL DICTIONARY ENTRIES-----//
+    //-----FUNCTION TO LOOP THROUGH AND PRINT ALL DICTIONARY ENTRIES-----//
     private void DebugDictionaryEntries()
     {
         Debug.Log("--- CURRENT LOBBY DICTIONARY ENTRIES ---");
@@ -201,6 +319,54 @@ public class TeamChoice : MonoBehaviour
 
         Debug.Log("----------------------------------------");
     }
+
+
+
+    public class EnemyClass
+    {
+        
+       
+        private int health;
+
+
+        public EnemyClass(int StartingHealth)
+        {
+
+            health = StartingHealth;   
+
+
+        }
+
+        //Function to handle health//
+        public void HandleHealth(int amount)
+        {
+            
+            health -= amount;
+
+
+        }
+
+
+    }
+
+
+    public class Zombie : EnemyClass
+    {
+        
+
+ // ✔️ FIXED: You write this by hand to catch the data and forward it up-line!
+    public Zombie(int StartingHealth) : base(StartingHealth)
+    {
+        // You can leave the body completely empty!
+    }
+
+
+    }
+
+
+    
+
+
 }
 
 

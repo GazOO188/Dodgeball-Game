@@ -31,7 +31,7 @@ public class PlayerInputHandler : MonoBehaviour
     
     public event Action<PlayerInput, TeamChoice.Teams> OnBothPlayersSubmitted;
 
-
+   
     //---CANCEL EVENT---//
     public event Action<PlayerInput> CancelToggleChoice;
     
@@ -39,6 +39,8 @@ public class PlayerInputHandler : MonoBehaviour
 
     [SerializeField] private bool Submitted = false;
 
+
+   
     //---------SUBSCRIBE TO ACTIONS-------------//
     void OnEnable()
     {

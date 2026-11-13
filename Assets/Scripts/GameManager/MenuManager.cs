@@ -16,6 +16,10 @@ public class MenuManager : MonoBehaviour
     [SerializeField] private Transform SelectTeamUICanvas;
 
 
+    [Header("UI State")]
+    [SerializeField] private bool CanHideStartButton = false;
+    
+
 
     [Header("Locations For UI")]
     [SerializeField] private List<Transform> ToggleLocations = new List<Transform>();
@@ -40,8 +44,19 @@ public class MenuManager : MonoBehaviour
     private ISceneLoader sceneLoader;
 
     
+    //---REF TO THE SCRIPT WITH THE INTERFACE(EVENTMESSENGER)---//
     private IEventMessenger eventMessenger;
 
+    
+    //---REF TO THE SCRIPT WITH THE INTERFACE(UIManager)---//
+    private IUiAnimation UIManager;
+
+    
+    //---REF TO THE SCRIPT WITH THE INTERFACE(TEAMCHOICE)---//
+    private ITeamManager TeamChoice;
+
+
+    private bool CanCancelOption = false;
    
 
     void OnEnable()
@@ -88,6 +103,27 @@ public class MenuManager : MonoBehaviour
 
     }
 
+    
+    //------THIS FUNCTION IT TO STORE A REFERECNE TO THE UIMANAGER SCRIPT WITH THE INTERFACE ATTACHED-----//
+    public void StoreUIManagerScript(IUiAnimation incomingReference)
+    {
+
+        UIManager = incomingReference;
+
+
+    }
+
+
+
+    //------THIS FUNCTION IS TO STORE A REFERENCE TO THE TEAMCHOICE SCRIPT-----//
+    public void StoreTeamChoice(ITeamManager incomingReference)
+    {
+        
+        TeamChoice = incomingReference;
+
+
+    }
+
 
 
     //JOIN FUNCTION//
@@ -122,6 +158,7 @@ public class MenuManager : MonoBehaviour
          PIH.OnSubmitPressed += SpawnToggle;
          PIH.CancelToggleChoice += RemoveToggleOnScreen;
          PIH.CancelToggleChoice += HandleTimeCancel;
+         
 
         
          //THIS LINKS THE ONTEAMSUBMIITED EVENT IN PLAYERINPUTHANDLER TO TRIGGERTEAMSUBMISSIONFULLY//
@@ -245,7 +282,7 @@ public class MenuManager : MonoBehaviour
             if (UICanvas != null)
             {
             
-            //THIS SETS THE TOGGLE THAT SPAWNED TO BE A CHILD OF THE TEAMUI CANVAS//
+             //THIS SETS THE TOGGLE THAT SPAWNED TO BE A CHILD OF THE TEAMUI CANVAS//
              ToggletoSpawn.transform.SetParent(SelectTeamUICanvas, false);
 
              //MAKE THE TOGGLE THAT SPAWNED APPEAR 2 IN THE CHILD LIST SO THAT IT DOSEN'T BE OVERLAY OR BE ON TOP OF THE TRANSTION ANIMATION//
@@ -255,8 +292,27 @@ public class MenuManager : MonoBehaviour
     
     
         }
+
+
+
+        //LOGIC FOR ADDING TEAM INTO PLAYERTEAMTRACKER//
+        if(TeamChoice != null)
+        {
+
+            //THIS IS SAYING: GET THE VALUE OF THE PLAYERINDEX IN THE DICTIONARY AND ITS ASSOCIATED TEAM//
+            if (TeamChoice.PlayerTeamTracker.TryGetValue(PlayerIndex, out TeamChoice.Teams ChosenTeam))
+                
+                
+                TeamChoice.HandleTeamAddition(PlayerIndex, ChosenTeam);
+
+
+
+            }
+
         
         }
+        
+        
 
    
 
@@ -267,6 +323,16 @@ public class MenuManager : MonoBehaviour
         //GET PLAYERINDEX VALUE//
         int playerIndex = PI.playerIndex;
 
+
+       
+        PlayerInputHandler PIH = PI.gameObject.GetComponent<PlayerInputHandler>();
+
+
+
+        //IF THE PLAYERTEAMTRACKER IS 2 CANHIDESTARTBUTTON IS TRUE || ELSE ITS FALSE
+        CanHideStartButton = (TeamChoice.PlayerTeamTracker.Count == 2) ? true : false;
+
+       
         //IF THE TOGGLE EXISTS, DESTROY IT//
         if (PlayerToggle.TryGetValue(playerIndex, out GameObject Toggle))
         {
@@ -274,10 +340,37 @@ public class MenuManager : MonoBehaviour
 
             Destroy(Toggle);
             
-            PlayerToggle.Remove(playerIndex);  
+           
+            PlayerToggle.Remove(playerIndex);
+
+
+            //HIDE THE READY BUTTON WHEN THE PLAYER CANCELS THEIR OPTION//
+            
+            //THIS PREVENTS THE HIDEBUTTON FROM BEING CANCELED TWICE//
+            if(!sceneLoader.CanCountdownBegin || CanHideStartButton)
+            {
+                
+           
+                UIManager.HideReadyButton();
+           
+           
+            }
 
 
 
+            //REMOVE THE PLAYER FROM THE DICTIONARY TEMPORARILY, UNTIL DECIDING//
+            if(TeamChoice.PlayerTeamTracker.TryGetValue(playerIndex, out TeamChoice.Teams ExclusiveTeam))
+            {
+                
+                
+
+                TeamChoice.HandleTeamRemoval(playerIndex, ExclusiveTeam);
+
+
+            }
+            
+        
+        
         }
 
 
@@ -336,15 +429,18 @@ public class MenuManager : MonoBehaviour
             
             LGS.Execute();
 
-           // PiH.CancelToggleChoice -= RemoveToggleOnScreen;
-
+          
 
 
         }
 
 
 
-    }
+      }
+
+
+
+    //----FUNCTION TO CARRY OUT WHAT HAPPENS WHEN 
   
 
 

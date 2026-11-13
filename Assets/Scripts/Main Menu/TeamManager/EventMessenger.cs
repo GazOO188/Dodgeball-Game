@@ -40,8 +40,13 @@ public class EventMessenger : MonoBehaviour, IEventMessenger
             //THERE IS NO INTSANCE OF A PLAYER YET SO MAKE THE EVENT IN THE MENU MANAGER//
             MM.OnTeamSubmitted += TC.HandleTeamAssignment;
 
+            
+            //TC.OnTeamAddedIntoDictionary += TC.HandleTeamAddition;
+
 
         }
+
+        
 
     }
 
@@ -81,7 +86,7 @@ public class EventMessenger : MonoBehaviour, IEventMessenger
         {
             
 
-            MM.StoreEventMessengerScript(EM);
+            MM.StoreEventMessengerScript(this);
 
 
 
@@ -96,6 +101,41 @@ public class EventMessenger : MonoBehaviour, IEventMessenger
             
 
             targetScript.StoreUIAnimScript(UIM);
+
+
+
+
+        }
+
+
+        //THIS STORES A REFERENCE TO THE UIMANAGER SCRIPT IN MENUMANAGER//
+        if(UIM != null)
+        {
+            
+            MM.StoreUIManagerScript(UIM);
+
+
+
+        }
+
+
+        //THIS STORES A REFERENCE TO THE TEAMCHOICE SCRIPT IN MENUMANAGER//
+        if(TC != null)
+        {
+
+            MM.StoreTeamChoice(TC);  
+
+
+
+        }
+
+
+        //STORES A REF TO THE UIMANAGER IN THE TEAMCHOICE SCRIPT//
+        if(TC != null)
+        {
+            
+            TC.StoreUIManagerScriptref(UIM);
+
 
 
         }
@@ -127,12 +167,12 @@ public class EventMessenger : MonoBehaviour, IEventMessenger
 
 
 
+        
+        //THIS LISTENS TO THE CHECKTEAMSPOTS FUNCTION (LINKS ONBOTHPLAYERSSUBMITTED EVENT TO THE FUNCTION)
         if(Pih != null && TC != null)
         {
 
             Pih.OnBothPlayersSubmitted += TC.CheckTeamSpots;
-
-            Pih.OnBothPlayersSubmitted += UIM.ShowReadyButton; 
 
             
         }
@@ -142,8 +182,6 @@ public class EventMessenger : MonoBehaviour, IEventMessenger
     }
 
     
-
-
 
     //FUNCTION A PART OF THE CONTRACT//
     public void Cancel()
@@ -164,29 +202,7 @@ public class EventMessenger : MonoBehaviour, IEventMessenger
 
 
 
-    //-----FUNCTION TO CLEAN UP EVENTS-----//
-    public void CleanUpEvents(PlayerInput pi)
-    {
-        
-        PlayerInputHandler PIH = pi.gameObject.GetComponent<PlayerInputHandler>();
-
-
-        if(PIH != null)
-        {
-            
-
-
-            PIH.OnBothPlayersSubmitted -= TC.CheckTeamSpots;
-
-            PIH.OnBothPlayersSubmitted -= UIM.ShowReadyButton; 
-
-
-        }
-
-
-
-
-    }
+    
 
 
 

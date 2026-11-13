@@ -12,6 +12,7 @@ public interface IUiAnimation
     void HideReadyButton();
     void PlayDirectorTransition();
     void StopFadetoBlackAnim();
+    void ShowReadyButton();
 }
 
 
@@ -84,8 +85,9 @@ public class UiManager : MonoBehaviour, IUiAnimation
     }
 
 
+   
     //-----FUNCTION TO SHOW THE READY BUTTON-----//
-    public void ShowReadyButton(PlayerInput Pi, TeamChoice.Teams teams)
+    public void ShowReadyButton()
     {
         
         

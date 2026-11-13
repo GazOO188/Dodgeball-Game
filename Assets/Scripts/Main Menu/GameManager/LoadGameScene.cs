@@ -7,6 +7,8 @@ using TMPro;
 public interface ISceneLoader
 {
     
+    bool CanCountdownBegin{get; set;}
+   
     void Execute();
 
 }
@@ -26,11 +28,12 @@ public class LoadGameScene : MonoBehaviour, ISceneLoader
     private Coroutine ActiveCoro;
 
 
-    public bool CanCountdownBegin = false;
+    public bool CanCountdownBegin{get; set;}
+   
 
 
 
-    //A REFERENCE TO THE UIMANAGER SCRIPT WITH THE IUIANIMATION INTERFACE//
+    //A REFERENCE TO THE UIMANAGER SCRIPT WITH THE IUIANIMATION INTERFACE -> (THE UIMananger SCRIPT)//
     private IUiAnimation Uiscript;
 
     
@@ -90,12 +93,15 @@ public class LoadGameScene : MonoBehaviour, ISceneLoader
         
         CountdownText.enabled = true;  
        
+       
         CountdownText.text = "3";
        
+      
         if(UIManagerScript != null)
         {
            Uiscript.HideReadyButton();
         }
+       
        
         yield return TimerDelay;
 
@@ -117,11 +123,13 @@ public class LoadGameScene : MonoBehaviour, ISceneLoader
           Uiscript.PlayDirectorTransition();  
         }
        
+        
         yield return TimerDelay;
 
         
         CountdownText.enabled = false;
         
+       
         yield return TimerDelay;  
 
         TransitionToGameScene("Game Scene");
@@ -164,7 +172,6 @@ public class LoadGameScene : MonoBehaviour, ISceneLoader
 
 
             //STOP THE PLAYABLE DIRECTOR//
-
             Uiscript.StopFadetoBlackAnim();
 
 

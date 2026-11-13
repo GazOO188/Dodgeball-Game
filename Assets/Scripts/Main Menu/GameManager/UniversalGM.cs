@@ -12,7 +12,7 @@ public class UniversalGM : ScriptableObject
 
 
 
-    //FUNCTION TO SAVE THE TEAMS//
+    //FUNCTION TO SAVE THE TEAMS IN THE DICTIONARY (UNIVERSAL DICTIONARY)//
     public void SaveTeams(int Playerindex, TeamChoice.Teams Teams)
     {
 
@@ -34,6 +34,22 @@ public class UniversalGM : ScriptableObject
 
         }
 
+
+
+        DebugCurrentTeams();
+
+    }
+
+
+
+    public void DebugCurrentTeams()
+    {
+        
+        foreach(KeyValuePair<int, TeamChoice.Teams> entry in UniversalTeamData)
+        {
+            // entry.Key is the Player Index, entry.Value is their locked-in team color choice!
+            Debug.Log($"[Persistent Memory Check] -> Player ID: {entry.Key} is officially saved as: {entry.Value}");
+        }
 
     }
 
